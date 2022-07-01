@@ -1,0 +1,5 @@
+# IDEA
+.idea/
+tokens/
+schedule-angular/node_modules/
+schedule-service/target/
