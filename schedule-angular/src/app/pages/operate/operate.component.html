@@ -1,0 +1,39 @@
+<nz-modal
+  [(nzVisible)]="isVisible"
+  [nzTitle]=null
+  [nzClosable]=null
+  [nzFooter] = null
+  (nzOnCancel)="handleCancel()">
+  <div *nzModalContent class="nz-modal">
+    <h3>
+      <label style="font-size: 1.67em;">{{ymShow}}</label>
+      <hr />
+      <label style="font-size: 1.17em;">{{workName}}</label>
+      <br />
+      <label style="font-size: 1.17em; margin-left: 20px">{{taskName}}</label>
+    </h3>
+    <div nz-space nzAlign="start" [nzSize]="sizeSpace">
+      <button nz-button nzType="default" class="start-button" (click)="updateStart(0)" [disabled]="workStatus != 0">開始</button>
+      <button nz-button nzType="default" class="stop-button" (click)="updateTimeInfo(2)" *ngIf="workStatus!=2" [disabled]="workStatus == 0 || workStatus==3">一時<br />中断</button>
+      <button nz-button nzType="default" class="stop-button" (click)="updateStart(1)" *ngIf="workStatus==2">再開</button>
+      <button nz-button nzType="default" class="end-button" (click)="updateTimeInfo(3)" [disabled]="workStatus != 1">タスク完了</button>
+    </div>
+    <h3>
+      <div style="height: 60px;">
+        <table>
+          <tr>
+            <td>
+              作業時間：
+            </td>
+            <td>
+              {{workTimes}}分
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div style="height: 60px;">
+        <button nz-button nzType="default" class="close-button" (click)="handleCancel()">戻る</button>
+      </div>
+    </h3>
+  </div>
+</nz-modal>

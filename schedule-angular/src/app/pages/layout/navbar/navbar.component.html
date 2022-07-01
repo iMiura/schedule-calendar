@@ -1,0 +1,35 @@
+<nz-layout class="app-layout">
+  <nz-layout>
+    <nz-header style="position: fixed;width: 100%;">
+      <div class="app-header">
+        <div class="sidebar-logo">
+          <a href="/" target="_blank">
+            <h1>進捗管理システム</h1>
+          </a>
+        </div>
+        <div style="position: fixed;top:0;right: 140px;display: flex">
+          <div>
+            <ng-container>
+              <h3>{{userName}}様</h3>
+            </ng-container>
+          </div>
+        </div>
+        <div style="position: fixed;top:0;right: 20px;display: flex;">
+          <div>
+            <ng-container>
+              <button nz-button nzType="primary" id="signout_button" nzDanger>ログアウト</button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </nz-header>
+
+    <div style="margin-top: 64px;height: 100%;background-color: #FFF1CE;">
+      <nz-content>
+        <div class="inner-content" id="inner-content">
+          <router-outlet></router-outlet>
+        </div>
+      </nz-content>
+    </div>
+  </nz-layout>
+</nz-layout>

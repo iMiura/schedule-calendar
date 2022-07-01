@@ -1,0 +1,27 @@
+<div style="width: 100%;text-align: right;">
+  <ng-container>
+    <nz-radio-group [(ngModel)]="radioValue" (ngModelChange)="changeList()">
+      <label nz-radio-button class="button-large" [nzValue]="0" *ngIf="permission==0 || permission==1 || permission==2">タスクリスト</label>
+      <label nz-radio-button class="button-large" [nzValue]="1" *ngIf="permission==0 || permission==1 || permission==2">業務フロー</label>
+      <label nz-radio-button class="button-large" [nzValue]="2" *ngIf="permission==0 || permission==1">ｶﾚﾝﾀﾞｰ展開</label>
+    </nz-radio-group>
+    <hr />
+  </ng-container>
+</div>
+<h3>マスターチーム：{{radioLabel[radioValue]}}ベース進捗
+  <div>
+    <label style="font-size: 1.17em;">{{ymShow}}</label>
+    <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-text" nzType="default" (click)="doPrevYm()" [disabled]="deployedYm==null || calendarYm<=startYm">◀</button>
+    <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-small" nzType="default" (click)="doCurrentYm()" [disabled]="deployedYm==null">今月の表示</button>
+    <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-text" nzType="default" (click)="doNextYm()" [disabled]="deployedYm==null || calendarYm>=deployedYm">▶</button>
+    <div *ngIf="(permission==0 || permission==1) && radioValue==2" style="display: inline-block; float: right; margin-right: 20px"><button nz-button [nzSize]="size" class="button-small" nzType="default" (click)="showConfirm($event)" [disabled]="message">ｶﾚﾝﾀﾞｰ確定</button></div>
+  </div>
+</h3>
+<div class="tab-wrap">
+  <div class="tab-content">
+    <div class="iframe-container">
+      <iframe allowTransparency="true" [src]="google_sheets_src" *ngIf="message == null && google_sheets_src != ''"></iframe>
+      <h3 *ngIf="message" style="color: red">{{message}}</h3>
+    </div>
+  </div>
+</div>
