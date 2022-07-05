@@ -16,7 +16,8 @@ exports.config = {
     browserName: 'chrome'
   },
   directConnect: true,
-  baseUrl: 'http://localhost:4200/',
+  // baseUrl: 'http://localhost:4200/',
+  baseUrl: 'https://stg-prg-mng.u-car.co.jp/',
   framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,
