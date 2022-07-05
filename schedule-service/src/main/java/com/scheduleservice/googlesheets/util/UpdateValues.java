@@ -106,7 +106,7 @@ public class UpdateValues {
             .build();
 
         // authorize
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(14200).setCallbackPath("/authorize").build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(18009).setCallbackPath("/authorize").build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId);
     }
 }
