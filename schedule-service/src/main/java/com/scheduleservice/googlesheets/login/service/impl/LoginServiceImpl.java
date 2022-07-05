@@ -1,5 +1,6 @@
 package com.scheduleservice.googlesheets.login.service.impl;
 
+import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
  * ユーザー情報 関連ビジネスロジックオブジェクト.
  */
 @Service
+@Slf4j
 public class LoginServiceImpl implements LoginService {
 
     @Autowired
@@ -91,8 +94,13 @@ public class LoginServiceImpl implements LoginService {
                 .build();
 
             // authorize
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(14200).setCallbackPath("/authorize").build();
-            return new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId);
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(18009).setCallbackPath("/authorize").build();
+            Credential credential = new AuthorizationCodeInstalledApp(flow, receiver) {
+                protected void onAuthorization(AuthorizationCodeRequestUrl authorizationUrl) {
+                    log.debug(authorizationUrl.build());
+                }
+            }.authorize(userId);
+            return credential;
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }
