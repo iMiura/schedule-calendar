@@ -3,6 +3,7 @@
   [nzTitle]=null
   [nzClosable]=null
   [nzFooter] = null
+  [nzMaskClosable] = false
   (nzOnCancel)="handleCancel()">
   <div *nzModalContent class="nz-modal">
     <h3>
@@ -12,6 +13,7 @@
       <br />
       <label style="font-size: 1.17em; margin-left: 20px">{{taskName}}</label>
     </h3>
+    <h3 *ngIf="message" style="color: red">※：このタスクは　{{message}}さん　の担当です。</h3>
     <div nz-space nzAlign="start" [nzSize]="sizeSpace">
       <button nz-button nzType="default" class="start-button" (click)="updateStart(0)" [disabled]="workStatus != 0">開始</button>
       <button nz-button nzType="default" class="stop-button" (click)="updateTimeInfo(2)" *ngIf="workStatus!=2" [disabled]="workStatus == 0 || workStatus==3">一時<br />中断</button>

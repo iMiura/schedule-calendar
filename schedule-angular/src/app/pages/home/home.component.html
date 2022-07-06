@@ -8,7 +8,7 @@
     <hr />
   </ng-container>
 </div>
-<h3>マスターチーム：{{radioLabel[radioValue]}}ベース進捗
+<h3>{{teamName}}：{{radioLabel[radioValue]}}ベース進捗
   <div>
     <label style="font-size: 1.17em;">{{ymShow}}</label>
     <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-text" nzType="default" (click)="doPrevYm()" [disabled]="deployedYm==null || calendarYm<=startYm">◀</button>

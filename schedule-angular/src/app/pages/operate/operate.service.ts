@@ -8,8 +8,8 @@ export class OperateService {
   constructor(private http: HttpClient) {
   }
 
-  findWorkTime(ym, taskId): Promise<any> {
-    return this.http.get(SERVER_API_URL + '/findWorkTime', {params: {ym, taskId}}).toPromise();
+  findWorkTime(ym, taskId, taskOwner): Promise<any> {
+    return this.http.get(SERVER_API_URL + '/findWorkTime', {params: {ym, taskId, taskOwner}}).toPromise();
   }
 
   updateStart(range, ym, taskId, status, finalChangeDate): Promise<any> {

@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {PlatformLocation} from '@angular/common';
 import {LoginService} from "../../../core/auth/login.service";
-import {PrincipalService} from 'src/app/core/auth/principal.service';
 import {LocalStorageService} from "ngx-webstorage";
 
 declare let google: any;
@@ -17,12 +16,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   userIdentity: any;
   userName: any;
+  teamName: any;
 
   constructor(private router: Router,
               private activeRoute: ActivatedRoute,
               private location: PlatformLocation,
               private localStorage: LocalStorageService,
-              private principalService: PrincipalService,
               private loginService: LoginService) {
   }
 
@@ -31,6 +30,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     that.userIdentity = this.localStorage.retrieve('userIdentity');
     if (that.userIdentity) {
       this.userName = that.userIdentity.userName;
+      this.teamName = that.userIdentity.teamName;
     }
     const button = document.getElementById('signout_button');
     button.onclick = () => {

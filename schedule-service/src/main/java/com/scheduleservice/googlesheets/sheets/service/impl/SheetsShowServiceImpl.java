@@ -5,16 +5,17 @@ import com.scheduleservice.googlesheets.constant.CommonConstant;
 import com.scheduleservice.googlesheets.exception.ServiceException;
 import com.scheduleservice.googlesheets.repository.entity.CalendarDeployedManagementEntity;
 import com.scheduleservice.googlesheets.repository.entity.GoogleSheetsInfoEntity;
+import com.scheduleservice.googlesheets.repository.entity.WorkYmInfoEntity;
 import com.scheduleservice.googlesheets.repository.service.ICalendarDeployedManagementService;
 import com.scheduleservice.googlesheets.repository.service.IGoogleSheetsInfoService;
 import com.scheduleservice.googlesheets.repository.service.ISystemPropertyService;
+import com.scheduleservice.googlesheets.repository.service.IWorkYmInfoService;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.sheets.service.SheetsShowService;
 import com.scheduleservice.googlesheets.util.DateUtil;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,8 @@ public class SheetsShowServiceImpl implements SheetsShowService {
     @Autowired
     private ISystemPropertyService iSystemPropertyService;
     @Autowired
+    private IWorkYmInfoService iWorkYmInfoService;
+    @Autowired
     private CustomMessageResource messageSource;
 
     @Override
@@ -44,14 +47,12 @@ public class SheetsShowServiceImpl implements SheetsShowService {
         // カレンダー年月度
         if (!StringUtils.hasLength(calendarYm)) {
             LocalDate date = LocalDate.now();
-            LocalDate lastDay = date.with(TemporalAdjusters.lastDayOfMonth());
-            int weekday = lastDay.getDayOfWeek().getValue();
-            int minusDays = weekday-3 < 0? weekday + 4 : weekday-3;
-            LocalDate finalDay = lastDay.minusDays(minusDays);
-            if (date.isAfter(finalDay)) {
-                date = date.plusMonths(1);
+            WorkYmInfoEntity workYmInfoEntity = iWorkYmInfoService.findWorkYmInfo(DateTimeFormatter.ofPattern("yyyyMMdd").format(date));
+            if (workYmInfoEntity != null) {
+                calendarYm = workYmInfoEntity.getCalendarYm();
+            } else {
+                calendarYm = DateTimeFormatter.ofPattern("yyyyMM").format(date);
             }
-            calendarYm = DateTimeFormatter.ofPattern("YYYYMM").format(date);
         }
 
         // チームID
@@ -66,9 +67,18 @@ public class SheetsShowServiceImpl implements SheetsShowService {
         if (calendarDeployedManagement != null) {
             deployedYm = calendarDeployedManagement.getCalendarDeployedYm();
         }
-
         // システム運用開始年月度
         String startYm = iSystemPropertyService.getProperty(teamId, CommonConstant.START_YM_KEY);
+        // カレンダー展開
+        if ("2".equals(urlFlg)) {
+            if (!StringUtils.hasLength(deployedYm)) {
+                calendarYm = startYm;
+            } else {
+                LocalDate deployedDate = LocalDate.parse(deployedYm + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+                deployedDate = deployedDate.plusMonths(1);
+                calendarYm = deployedDate.format(DateTimeFormatter.ofPattern("yyyyMM"));
+            }
+        }
 
         Map result = new HashMap();
         result.put("calendarYm", calendarYm);

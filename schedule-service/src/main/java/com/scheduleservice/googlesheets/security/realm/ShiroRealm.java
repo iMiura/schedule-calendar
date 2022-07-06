@@ -1,6 +1,7 @@
 package com.scheduleservice.googlesheets.security.realm;
 
 import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
+import com.scheduleservice.googlesheets.repository.service.ITeamInfoService;
 import com.scheduleservice.googlesheets.repository.service.IUserInfoService;
 import com.scheduleservice.googlesheets.security.jwt.JwtService;
 import com.scheduleservice.googlesheets.security.jwt.JwtToken;
@@ -37,6 +38,8 @@ public class ShiroRealm extends AuthorizingRealm {
     @Autowired
     @Lazy
     private IUserInfoService userService;
+    @Autowired
+    private ITeamInfoService iTeamInfoService;
 
     /**
      * Shiroエラーのため、メソッドの再定義
@@ -89,6 +92,7 @@ public class ShiroRealm extends AuthorizingRealm {
         }
         String roleId = jwtService.getRoleId(jwtToken);
         userInfo.setGUserId(roleId);
+        userInfo.setTeamName(iTeamInfoService.getById(userInfo.getTeamId()).getTeamName());
 
         this.setCredentialsMatcher(credentialsMatcher());
 

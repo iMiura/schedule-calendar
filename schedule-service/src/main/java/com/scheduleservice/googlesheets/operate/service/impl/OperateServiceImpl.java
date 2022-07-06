@@ -70,7 +70,7 @@ public class OperateServiceImpl implements OperateService {
         // 作業時間管理情報取得
         List<WorkTimeManagementEntity> list = iWorkTimeManagementService.getWorkTime(teamId, ym, taskId);
         // 作業時間
-        long times = 0;
+        double times = 0;
         // 進捗状況 【1:着手中」「2:中断」「3:終了】
         int status = 0;
         // 作業時間ID
@@ -83,15 +83,17 @@ public class OperateServiceImpl implements OperateService {
             finalChangeDate = DateUtil.getMilli(item.getFinalChangerDate());
             // 作業時間を算出する
             if (item.getTimeRecordEnd() != null) {
-                Long difSec = DateUtil.between(
+                double difSec = (double) DateUtil.between(
                     Date.from(item.getTimeRecordStart().atZone(ZoneId.systemDefault()).toInstant()),
                     Date.from(item.getTimeRecordEnd().atZone(ZoneId.systemDefault()).toInstant()),
                     DateUnit.SECOND) / 60;
-                if (difSec < 1) {
-                    difSec = 1l;
-                }
                 times += difSec;
             }
+        }
+        if (0 < times && times < 1) {
+            times = 1;
+        } else {
+            times = Math.ceil(times);
         }
         resultMap.put("timeRecordId", timeRecordId);
         resultMap.put("finalChangeDate", finalChangeDate);

@@ -17,24 +17,20 @@ export class OperateComponent implements OnInit {
   isVisible = true;
   sizeSpace = 8;
 
-  //ファイルID
-  spreadsheetId: any;
-  // ファイルSheetID
-  sheetId: any;
   // 年月度
   ym: any;
   // タスクID
   taskId: any;
   // タスク所在行数
   row: any;
-  // タスク進捗状況
-  task: any;
   // タスク進捗状況の座標
   col0: any;
   // 実績開始日列の座標
   col1: any;
   // 実績終了日列の座標
   col2: any;
+  // タスク担当者ID
+  taskOwner: any;
 
   // 年月度
   ymShow: string;
@@ -48,6 +44,7 @@ export class OperateComponent implements OnInit {
   workStatus: any;
   timeRecordId: any;
   finalChangeDate: any;
+  message: any;
 
   constructor(private http: HttpClient,
               private router: Router,
@@ -61,28 +58,28 @@ export class OperateComponent implements OnInit {
    * 画面初期化
    */
   ngOnInit(): void {
+    this.message = null;
     this.workTimes = '';
-    this.spreadsheetId = this.route.snapshot.queryParams.spreadsheetId;
-    this.sheetId = this.route.snapshot.queryParams.sheetNm;
     this.ym = this.route.snapshot.queryParams.ym;
     this.taskId = this.route.snapshot.queryParams.taskID;
     this.row = this.route.snapshot.queryParams.row;
-    this.task = this.route.snapshot.queryParams.task;
     this.col0 = this.route.snapshot.queryParams.col0;
     this.col1 = this.route.snapshot.queryParams.col1;
     this.col2 = this.route.snapshot.queryParams.col2;
+    this.taskOwner = this.route.snapshot.queryParams.taskOwner;
     this.ymShow = moment(this.ym + '01').format('yyyy年MM月度');
     this.query();
   }
 
   query() {
-    this.operateService.findWorkTime(this.ym, this.taskId).then(res => {
+    this.operateService.findWorkTime(this.ym, this.taskId, this.taskOwner).then(res => {
       this.workName = res.result.workName;
       this.taskName = res.result.taskName;
       this.workTimes = res.result.workTimes;
       this.workStatus = res.result.status;
       this.timeRecordId = res.result.timeRecordId;
       this.finalChangeDate = res.result.finalChangeDate;
+      this.message = res.result.message_owner;
     });
   }
 

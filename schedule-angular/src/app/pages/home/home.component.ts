@@ -8,6 +8,7 @@ import {HomeService} from "./home.service";
 import {ResponseEnum} from "../../response.enum";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {NzModalService} from 'ng-zorro-antd/modal';
+import {LocalStorageService} from "ngx-webstorage";
 
 @Component({
   selector: 'app-home',
@@ -30,12 +31,15 @@ export class HomeComponent implements OnInit {
   ymShow: any;
   listYm: any;
   finalChangeDate: any;
+  userIdentity: any;
+  teamName: any;
 
   constructor(private http: HttpClient,
               private router: Router,
               private modal: NzModalService,
               private nzMessage: NzMessageService,
               private homeService: HomeService,
+              private localStorage: LocalStorageService,
               private sanitizer: DomSanitizer) {
 
   }
@@ -43,19 +47,21 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.message = null;
     this.calendarYm = '';
-    this.listYm = this.calendarYm;
+    this.listYm = '';
+    this.userIdentity = this.localStorage.retrieve('userIdentity');
+    if (this.userIdentity) {
+      this.teamName = this.userIdentity.teamName;
+      if (this.userIdentity.userPermission == 0 || this.userIdentity.userPermission == 1) {
+        this.radioValue = 2;
+      }
+    }
     this.getSheet();
   }
 
   changeList() {
     // カレンダー展開の場合
     if (this.radioValue == 2) {
-      this.listYm = this.calendarYm;
-      if (this.deployedYm) {
-        this.calendarYm = moment(this.deployedYm + '01').add(1, 'months').format('YYYYMM');
-      } else {
-        this.calendarYm = this.startYm;
-      }
+      this.calendarYm = '';
     } else {
       this.calendarYm = this.listYm;
     }

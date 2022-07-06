@@ -3,6 +3,8 @@ package com.scheduleservice.googlesheets.operate.controller;
 import com.scheduleservice.googlesheets.config.CustomMessageResource;
 import com.scheduleservice.googlesheets.constant.CommonConstant;
 import com.scheduleservice.googlesheets.operate.service.OperateService;
+import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
+import com.scheduleservice.googlesheets.repository.service.IUserInfoService;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.util.JsonResult;
 import io.swagger.annotations.Api;
@@ -28,6 +30,8 @@ public class OperateController {
 
     @Autowired
     OperateService operateService;
+    @Autowired
+    private IUserInfoService iUserInfoService;
 
     @Autowired
     private CustomMessageResource messageSource;
@@ -35,7 +39,8 @@ public class OperateController {
     @GetMapping("/findWorkTime")
     public ResponseEntity<JsonResult> findWorkTime(
         @RequestParam("ym") String ym,
-        @RequestParam("taskId") Long taskId) {
+        @RequestParam("taskId") Long taskId,
+        @RequestParam("taskOwner") String taskOwner) {
         log.debug("作業時間情報処理 開始（" + SessionUtil.getUserInfo().getUserName() + "）");
 
         // チームID
@@ -43,6 +48,14 @@ public class OperateController {
 
         // 作業時間取得
         Map resultMap = operateService.getWorkTime(teamId, ym, taskId);
+
+        // ログイン者と異なる場合、メッセージ（赤）を表示する
+        if (!taskOwner.equals(SessionUtil.getUserInfo().getGmailAddress())) {
+            UserInfoEntity userInfo = iUserInfoService.getByGmail(taskOwner);
+            if (userInfo != null) {
+                resultMap.put("message_owner", userInfo.getUserName());
+            }
+        }
 
         log.debug("作業時間情報処理 完了（" + SessionUtil.getUserInfo().getUserName() + "）");
         return new ResponseEntity<>(JsonResult.success(resultMap), HttpStatus.OK);

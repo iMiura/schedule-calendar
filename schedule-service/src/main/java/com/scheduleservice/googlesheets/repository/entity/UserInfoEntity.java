@@ -60,4 +60,9 @@ public class UserInfoEntity implements Serializable {
     @TableField(exist = false)
     private String gUserId;
 
+    /**
+     * チーム名
+     */
+    @TableField(exist = false)
+    private String teamName;
 }
