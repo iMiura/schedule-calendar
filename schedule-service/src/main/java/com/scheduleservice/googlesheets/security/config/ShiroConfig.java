@@ -38,7 +38,7 @@ public class ShiroConfig {
         DefaultSubjectDAO subjectDAO = new DefaultSubjectDAO();
         // jwtを使用するため、サーバのsessionをクローズ
         DefaultSessionStorageEvaluator evaluator = (DefaultSessionStorageEvaluator) subjectDAO.getSessionStorageEvaluator();
-        evaluator.setSessionStorageEnabled(Boolean.FALSE);
+//        evaluator.setSessionStorageEnabled(Boolean.FALSE);
         subjectDAO.setSessionStorageEvaluator(evaluator);
         securityManager.setSubjectDAO(subjectDAO);
         return securityManager;
