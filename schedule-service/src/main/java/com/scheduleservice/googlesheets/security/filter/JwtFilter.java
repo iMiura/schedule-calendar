@@ -22,9 +22,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     @Override
     protected boolean isAccessAllowed(
         ServletRequest request, ServletResponse response, Object mappedValue) {
-
-        log.error("認証できてる");
-
         try {
             executeLogin(request, response);
         } catch (AuthenticationException e) {
@@ -40,9 +37,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     @Override
     protected boolean executeLogin(
         ServletRequest request, ServletResponse response) throws Exception {
-
-        log.error("ログイン実行");
-
         JwtToken jwtToken = new JwtToken(getAuthzHeader(request));
         getSubject(request, response).login(jwtToken);
         return true;
@@ -50,9 +44,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
-
-        log.error("準備中・・・");
-
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         httpServletResponse.setHeader("Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
@@ -66,9 +57,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     }
 
     private void setUnauthorizedErrorResponse(HttpServletResponse response, Throwable ex) {
-
-        log.error("認証できてない");
-
         response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setCharacterEncoding("UTF-8");
