@@ -17,15 +17,12 @@ import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * jwt service
  *
  * @author :keisho
  */
 @Service
-@Slf4j
 public class JwtService {
 
     @Autowired
@@ -115,16 +112,10 @@ public class JwtService {
      */
     public String getClaimField(String token, String key) {
         try {
-            log.debug("tokenBefore -> " + token);
             token = getToken(token);
-            log.debug("tokenAfter -> " + token);
-            log.debug("key -> " + key);
             DecodedJWT jwt = JWT.decode(token);
-
             return jwt.getClaim(key).asString();
         } catch (JWTDecodeException e) {
-            log.debug("e.stack -> " + e.getStackTrace());
-            log.debug("e.msg -> " + e.getMessage());
             throw new AuthenticationException("リクエスト無効");
         }
     }
