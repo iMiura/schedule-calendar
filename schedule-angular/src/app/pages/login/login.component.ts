@@ -50,9 +50,14 @@ export class LoginComponent implements OnInit {
         return;
       }
 
-      that.navigate(['/home'], {
-        skipLocationChange: false,
-      });
+      if (data.body.result.URL) {
+        window.location.href=data.body.result.URL;
+      } else {
+        that.navigate(['/home'], {
+          skipLocationChange: false,
+        });
+
+      }
     })
   }
 

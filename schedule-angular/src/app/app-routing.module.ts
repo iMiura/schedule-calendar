@@ -3,6 +3,7 @@ import {Routes, RouterModule} from '@angular/router';
 import {LoginComponent} from './pages/login/login.component';
 import {OperateComponent} from './pages/operate/operate.component';
 import {NavbarComponent} from './pages/layout/navbar/navbar.component';
+import {CredentialComponent} from "./pages/credential/credential.component";
 
 const routes: Routes = [
   {
@@ -28,6 +29,10 @@ const routes: Routes = [
   {
     path: 'operate',
     component: OperateComponent
+  },
+  {
+    path: 'credential',
+    component: CredentialComponent
   },
 ];
 

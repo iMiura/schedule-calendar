@@ -222,8 +222,9 @@ public class OperateServiceImpl implements OperateService {
 
         String appName = iSystemPropertyService.getProperty(teamId, CommonConstant.APPLICATION_NAME);
         try {
-            String CREDENTIALS_FILE_PATH = constant.getCredentialsFilePath();
-            UpdateValues.updateValues(gUserId, CREDENTIALS_FILE_PATH, appName, spreadsheetId, rangeList, "USER_ENTERED", values);
+            String credentialsFilePath = constant.getCredentialsFilePath();
+            String tokensFilePath = constant.getTokensFilePath();
+            UpdateValues.updateValues(gUserId, credentialsFilePath, tokensFilePath, appName, spreadsheetId, rangeList, "USER_ENTERED", values);
             log.debug("Google Sheets の情報（ファイルID：" + spreadsheetId + "、シート名：" + sheetName
                 + "、設定行：" + range + "、設定値：" + values + "）");
         } catch (IOException e) {

@@ -1,8 +1,6 @@
 package com.scheduleservice.googlesheets.util;// Copyright 2022 Google LLC
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.json.GoogleJsonError;
@@ -29,17 +27,18 @@ public class UpdateValues {
     /**
      * Google Sheetsの所定セルに値を投入
      *
-     * @param userId - ユーザID
+     * @param userId ユーザID
      * @param appName APPLICATION_NAME
-     * @param spreadsheetId - Google SheetsのファイルID
-     * @param range - セル指定（例：A1:B1）
-     * @param valueInputOption - 投入値の型（デフォルト）
-     * @param values - 投入値（リスト）
+     * @param spreadsheetId Google SheetsのファイルID
+     * @param range セル指定（例：A1:B1）
+     * @param valueInputOption 投入値の型（デフォルト）
+     * @param values 投入値（リスト）
      * @return result
      * @throws IOException
      */
     public static UpdateValuesResponse updateValues(String userId,
                                                     String filePath,
+                                                    String tokensFilePath,
                                                     String appName,
                                                     String spreadsheetId,
                                                     List<String> range,
@@ -50,7 +49,7 @@ public class UpdateValues {
         // Create the sheets API client
         Sheets service = new Sheets.Builder(new NetHttpTransport(),
             GsonFactory.getDefaultInstance(),
-            authorize(userId, filePath))
+            authorize(userId, filePath, tokensFilePath))
             .setApplicationName(appName)
             .build();
 
@@ -86,11 +85,11 @@ public class UpdateValues {
     /**
      * Google Sheetsの所定セルに値を投入時の権限認証
      *
-     * @param userId - ユーザID
+     * @param userId ユーザID
      * @return Credential
      * @throws IOException
      */
-    private static Credential authorize(String userId, String filePath) throws IOException {
+    private static Credential authorize(String userId, String filePath, String tokensFilePath) throws IOException {
 
         JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
         List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
@@ -101,12 +100,10 @@ public class UpdateValues {
         // set up authorization code flow
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
             new NetHttpTransport(), JSON_FACTORY, clientSecrets, SCOPES)
-            .setDataStoreFactory(new FileDataStoreFactory(new java.io.File("tokens")))
+            .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(tokensFilePath)))
             .setAccessType("offline")
             .build();
-
-        // authorize
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(14200).setCallbackPath("/authorize").build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId);
+        Credential credential = flow.loadCredential(userId);
+        return credential;
     }
 }

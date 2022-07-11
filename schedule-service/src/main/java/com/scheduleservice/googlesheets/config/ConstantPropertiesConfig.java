@@ -13,6 +13,9 @@ public class ConstantPropertiesConfig {
   @Value("${credentials.file.path}")
   private String credentialsFilePath;
 
+  @Value("${tokens.file.path}")
+  private String tokensFilePath;
+
   @Value("${jwt.secret.key}")
   private String jwtSecretKey;
 

@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -56,7 +57,7 @@ public class LoginController {
      */
     @PostMapping("/authentication")
     public ResponseEntity<JsonResult> authentication(@RequestParam("credential") String credential,
-        @RequestParam("ip") String ip, @RequestParam("browser") String browser) {
+        @RequestParam("ip") String ip, @RequestParam("browser") String browser, ServletRequest request) {
 
         log.debug("ログイン認証　開始");
         Map userModel = new HashMap();
@@ -92,6 +93,9 @@ public class LoginController {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Authorization", token);
                 headers.add("Access-Control-Expose-Headers", CommonConstant.AUTHORIZATION);
+
+                String url = loginService.authorize(userIfno.getGUserId(), request);
+                userModel.put("URL", url);
 
                 log.debug("ログイン認証　完了");
                 return new ResponseEntity<>(JsonResult.success(userModel), headers, HttpStatus.OK);

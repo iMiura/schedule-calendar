@@ -29,6 +29,7 @@ import {AuthInterceptor} from "./core/interceptor/auth.interceptor";
 import {LocalStorageService, NgxWebstorageModule, SessionStorageService} from "ngx-webstorage";
 import {ExceptionHandlerInterceptor} from "./core/interceptor/exception.handler.interceptor";
 import {NzNotificationService} from 'ng-zorro-antd/notification';
+import {CredentialComponent} from "./pages/credential/credential.component";
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import {NzNotificationService} from 'ng-zorro-antd/notification';
     LoginComponent,
     NavbarComponent,
     OperateComponent,
+    CredentialComponent,
   ],
   imports: [
     BrowserModule,

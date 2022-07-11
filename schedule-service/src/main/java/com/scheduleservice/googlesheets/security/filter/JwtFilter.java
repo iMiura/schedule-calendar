@@ -58,10 +58,10 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 
     private void setUnauthorizedErrorResponse(HttpServletResponse response, Throwable ex) {
         response.setContentType("application/json; charset=utf-8");
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setCharacterEncoding("UTF-8");
         try {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+            response.sendError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
         } catch (IOException e) {
             throw new RuntimeException("システムエラー:" + e.getMessage());
         }

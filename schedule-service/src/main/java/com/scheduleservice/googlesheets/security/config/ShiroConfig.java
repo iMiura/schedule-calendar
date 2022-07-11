@@ -63,7 +63,7 @@ public class ShiroConfig {
 
         filterChainDefinitionMap.put("/authentication", "anon");
         filterChainDefinitionMap.put("/client", "anon");
-//        filterChainDefinitionMap.put("/swagger-ui/index.html", "anon");
+        filterChainDefinitionMap.put("/account/credential", "anon");
         // jwtのFilter認証
         filterChainDefinitionMap.put("/**", "jwt");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
