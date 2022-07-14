@@ -9,6 +9,7 @@ import com.scheduleservice.googlesheets.config.CustomMessageResource;
 import com.scheduleservice.googlesheets.constant.CommonConstant;
 import com.scheduleservice.googlesheets.exception.ServiceException;
 import com.scheduleservice.googlesheets.login.service.impl.LoginServiceImpl;
+import com.scheduleservice.googlesheets.operate.service.impl.OperateServiceImpl;
 import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
 import com.scheduleservice.googlesheets.security.jwt.JwtService;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
@@ -43,6 +44,8 @@ public class LoginController {
 
     @Autowired
     LoginServiceImpl loginService;
+    @Autowired
+    OperateServiceImpl operateService;
 
     @Autowired
     private JwtService jwtService;
@@ -94,7 +97,7 @@ public class LoginController {
                 headers.add("Authorization", token);
                 headers.add("Access-Control-Expose-Headers", CommonConstant.AUTHORIZATION);
 
-                String url = loginService.authorize(userIfno.getGUserId(), request);
+                String url = operateService.authorize(userIfno.getGUserId(), request);
                 userModel.put("URL", url);
 
                 log.debug("ログイン認証　完了");

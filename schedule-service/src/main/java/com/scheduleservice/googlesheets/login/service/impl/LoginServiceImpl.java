@@ -1,32 +1,19 @@
 package com.scheduleservice.googlesheets.login.service.impl;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.services.sheets.v4.SheetsScopes;
 import com.scheduleservice.googlesheets.config.ConstantPropertiesConfig;
 import com.scheduleservice.googlesheets.config.CustomMessageResource;
 import com.scheduleservice.googlesheets.exception.ServiceException;
-import com.scheduleservice.googlesheets.login.controller.LoginController;
 import com.scheduleservice.googlesheets.login.service.LoginService;
 import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
 import com.scheduleservice.googlesheets.repository.service.IUserInfoService;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.List;
-import javax.servlet.ServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 /**
  * ユーザー情報 関連ビジネスロジックオブジェクト.
@@ -67,86 +54,5 @@ public class LoginServiceImpl implements LoginService {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }
-    }
-
-    @Override
-    public String authorize(String userId, ServletRequest request) throws ServiceException {
-
-        JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-        List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
-        String CREDENTIALS_FILE_PATH = constant.getCredentialsFilePath();
-        String TOKENS_FILE_PATH = constant.getTokensFilePath();
-
-        try {
-            // load client secrets
-            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-                new InputStreamReader(LoginController.class.getResourceAsStream(CREDENTIALS_FILE_PATH)));
-            // set up authorization code flow
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                new NetHttpTransport(), JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_FILE_PATH)))
-                .setAccessType("offline")
-                .build();
-            Credential credential = flow.loadCredential(userId);
-            if (credential == null) {
-                String webName = "";
-                String webURI = request.getServletContext().getContextPath();
-                if (StringUtils.hasLength(webURI)) {
-                    webName = webURI;
-                    WebUtils.toHttp(request).getSession(true).setAttribute("URL", WebUtils.toHttp(request).getHeader("Referer"));
-                }
-                String localAddr = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-                if (StringUtils.hasLength(webName)) {
-                    localAddr = localAddr + webName + "/account";
-                }
-                localAddr = localAddr + "/credential";
-                GoogleAuthorizationCodeRequestUrl url = flow.newAuthorizationUrl();
-                url.setRedirectUri(localAddr);
-                log.debug(url.build());
-                return url.build();
-            }
-
-            return "";
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        }
-    }
-
-    @Override
-    public void credential(String userId, String code, ServletRequest request) {
-        JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-        List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
-        String CREDENTIALS_FILE_PATH = constant.getCredentialsFilePath();
-        String TOKENS_FILE_PATH = constant.getTokensFilePath();
-        try {
-            // load client secrets
-            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-                new InputStreamReader(LoginController.class.getResourceAsStream(CREDENTIALS_FILE_PATH)));
-            // set up authorization code flow
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                new NetHttpTransport(), JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_FILE_PATH)))
-                .setAccessType("offline")
-                .build();
-            Credential credential = flow.loadCredential(userId);
-            if (credential == null) {
-                GoogleAuthorizationCodeTokenRequest tokenRequest = flow.newTokenRequest(code);
-                String webName = "";
-                String webURI = request.getServletContext().getContextPath();
-                if (StringUtils.hasLength(webURI)) {
-                    webName = webURI;
-                }
-                String localAddr = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-                if (StringUtils.hasLength(webName)) {
-                    localAddr = localAddr + webName + "/account";
-                }
-                localAddr = localAddr + "/credential";
-                tokenRequest.setRedirectUri(localAddr);
-                flow.createAndStoreCredential(tokenRequest.execute(), userId);
-            }
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        }
-
     }
 }

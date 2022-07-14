@@ -1,6 +1,7 @@
 package com.scheduleservice.googlesheets.login.controller;
 
 import com.scheduleservice.googlesheets.login.service.impl.LoginServiceImpl;
+import com.scheduleservice.googlesheets.operate.service.impl.OperateServiceImpl;
 import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.util.JsonResult;
@@ -32,6 +33,8 @@ public class AccountController {
 
     @Autowired
     LoginServiceImpl loginService;
+    @Autowired
+    OperateServiceImpl operateService;
 
     /**
      * ログインユーザー情報取得
@@ -59,7 +62,7 @@ public class AccountController {
     public ResponseEntity<JsonResult> createCredential(@RequestParam("code") String code, ServletRequest request) {
         log.debug("Google Sheetsの権限認証チェック 開始");
 
-        loginService.credential(SessionUtil.getUserInfo().getGUserId(), code, request);
+        operateService.credential(SessionUtil.getUserInfo().getGUserId(), code, request);
 
         log.debug("Google Sheetsの権限認証チェック 完了");
         return new ResponseEntity<>(HttpStatus.OK);

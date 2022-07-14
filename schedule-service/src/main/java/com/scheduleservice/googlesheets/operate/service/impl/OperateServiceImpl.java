@@ -1,9 +1,22 @@
 package com.scheduleservice.googlesheets.operate.service.impl;
 
 import cn.hutool.core.date.DateUnit;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.DataStoreCredentialRefreshListener;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.SheetsScopes;
 import com.scheduleservice.googlesheets.config.ConstantPropertiesConfig;
 import com.scheduleservice.googlesheets.constant.CommonConstant;
 import com.scheduleservice.googlesheets.exception.ServiceException;
+import com.scheduleservice.googlesheets.login.controller.LoginController;
 import com.scheduleservice.googlesheets.operate.service.OperateService;
 import com.scheduleservice.googlesheets.repository.entity.GoogleSheetsInfoEntity;
 import com.scheduleservice.googlesheets.repository.entity.TaskInfoEntity;
@@ -18,14 +31,18 @@ import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.util.DateUtil;
 import com.scheduleservice.googlesheets.util.UpdateValues;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.ServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +67,10 @@ public class OperateServiceImpl implements OperateService {
     private ISystemPropertyService iSystemPropertyService;
     @Autowired
     private ConstantPropertiesConfig constant;
+
+    private GoogleAuthorizationCodeFlow flow;
+    /** Sheet service. */
+    private Sheets sheetsService;
 
     @Override
     public Map getWorkTime(Long teamId, String ym, Long taskId) throws ServiceException {
@@ -217,16 +238,126 @@ public class OperateServiceImpl implements OperateService {
             rangeList.add(sheetName + "!" + ran + ":" + ran);
         }
 
-        // GOOGLE ユーザID
-        String gUserId = SessionUtil.getUserInfo().getGUserId();
-
-        String appName = iSystemPropertyService.getProperty(teamId, CommonConstant.APPLICATION_NAME);
         try {
-            String credentialsFilePath = constant.getCredentialsFilePath();
-            String tokensFilePath = constant.getTokensFilePath();
-            UpdateValues.updateValues(gUserId, credentialsFilePath, tokensFilePath, appName, spreadsheetId, rangeList, "USER_ENTERED", values);
+            if (sheetsService == null) {
+                getService();
+            }
+            UpdateValues.updateValues(sheetsService, spreadsheetId, rangeList, "USER_ENTERED", values);
             log.debug("Google Sheets の情報（ファイルID：" + spreadsheetId + "、シート名：" + sheetName
                 + "、設定行：" + range + "、設定値：" + values + "）");
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
+    @Override
+    public String authorize(String userId, ServletRequest request) throws ServiceException {
+
+        JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+        List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
+        String CREDENTIALS_FILE_PATH = constant.getCredentialsFilePath();
+        String TOKENS_FILE_PATH = constant.getTokensFilePath();
+
+        try {
+            // load client secrets
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
+                new InputStreamReader(LoginController.class.getResourceAsStream(CREDENTIALS_FILE_PATH)));
+            // set up authorization code flow
+            FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new java.io.File(TOKENS_FILE_PATH));
+            flow = new GoogleAuthorizationCodeFlow.Builder(
+                new NetHttpTransport(), JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(dataStoreFactory)
+                .setAccessType("offline")
+                .setApprovalPrompt("force")
+                .addRefreshListener(new DataStoreCredentialRefreshListener(userId, dataStoreFactory))
+                .build();
+            Credential credential = flow.loadCredential(userId);
+            if (credential == null) {
+                String webName = "";
+                String webURI = request.getServletContext().getContextPath();
+                if (StringUtils.hasLength(webURI)) {
+                    webName = webURI;
+                    WebUtils.toHttp(request).getSession(true).setAttribute("URL", WebUtils.toHttp(request).getHeader("Referer"));
+                }
+                String localAddr = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+                if (StringUtils.hasLength(webName)) {
+                    localAddr = localAddr + webName + "/account";
+                }
+                localAddr = localAddr + "/credential";
+                GoogleAuthorizationCodeRequestUrl url = flow.newAuthorizationUrl();
+                url.setRedirectUri(localAddr);
+                log.debug(url.build());
+                return url.build();
+            }
+
+            return "";
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void credential(String userId, String code, ServletRequest request) {
+        try {
+            Credential credential = flow.loadCredential(userId);
+            if (credential == null) {
+                GoogleAuthorizationCodeTokenRequest tokenRequest = flow.newTokenRequest(code);
+                String webName = "";
+                String webURI = request.getServletContext().getContextPath();
+                if (StringUtils.hasLength(webURI)) {
+                    webName = webURI;
+                }
+                String localAddr =
+                    request.getScheme() + "://" + request.getServerName() + ":" + request
+                        .getServerPort();
+                if (StringUtils.hasLength(webName)) {
+                    localAddr = localAddr + webName + "/account";
+                }
+                localAddr = localAddr + "/credential";
+                tokenRequest.setRedirectUri(localAddr);
+                credential = flow.createAndStoreCredential(tokenRequest.execute(), userId);
+            }
+            // チームID
+            Long teamId = SessionUtil.getUserInfo().getTeamId();
+            String appName = iSystemPropertyService.getProperty(teamId, CommonConstant.APPLICATION_NAME);
+            sheetsService = new Sheets.Builder(new NetHttpTransport(),
+                GsonFactory.getDefaultInstance(), credential)
+                .setApplicationName(appName)
+                .build();
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
+    private void getService() throws ServiceException {
+        JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+        List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
+        String CREDENTIALS_FILE_PATH = constant.getCredentialsFilePath();
+        String TOKENS_FILE_PATH = constant.getTokensFilePath();
+        String userId = SessionUtil.getUserInfo().getGUserId();
+
+        try {
+            // load client secrets
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
+                new InputStreamReader(LoginController.class.getResourceAsStream(CREDENTIALS_FILE_PATH)));
+            // set up authorization code flow
+            FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new java.io.File(TOKENS_FILE_PATH));
+            flow = new GoogleAuthorizationCodeFlow.Builder(
+                new NetHttpTransport(), JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(dataStoreFactory)
+                .setAccessType("offline")
+                .setApprovalPrompt("force")
+                .addRefreshListener(new DataStoreCredentialRefreshListener(userId, dataStoreFactory))
+                .build();
+            Credential credential = flow.loadCredential(userId);
+            // チームID
+            Long teamId = SessionUtil.getUserInfo().getTeamId();
+            String appName = iSystemPropertyService.getProperty(teamId, CommonConstant.APPLICATION_NAME);
+            sheetsService = new Sheets.Builder(new NetHttpTransport(),
+                GsonFactory.getDefaultInstance(), credential)
+                .setApplicationName(appName)
+                .build();
+
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }

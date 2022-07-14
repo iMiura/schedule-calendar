@@ -53,8 +53,17 @@ export class ExceptionHandlerInterceptor implements HttpInterceptor {
     router.navigate(['/login'], {
       skipLocationChange: false,
     }).then(() => {
-      // エラーメッセージ表示
-      this.notifyErrorToUserWithContent(err.error.message);
+      if (err.status === 403) {
+        const notification: NzNotificationService = this.injector.get(NzNotificationService);
+        notification.create(
+          'info',
+          '',
+          'ログインボタンでログインしてください。'
+        );
+      } else {
+        // エラーメッセージ表示
+        this.notifyErrorToUserWithContent(err.error.message);
+      }
     });
   }
 

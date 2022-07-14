@@ -2,6 +2,7 @@ package com.scheduleservice.googlesheets.operate.service;
 
 import com.scheduleservice.googlesheets.exception.ServiceException;
 import java.util.Map;
+import javax.servlet.ServletRequest;
 
 /**
  * @author :keisho
@@ -38,4 +39,23 @@ public interface OperateService {
      * @param finalChangeDate 最終更新日時
      */
     boolean updateTimeInfo(String ym, Long timeRecordId, String range, int status, String finalChangeDate) throws ServiceException;
+
+    /**
+     * Google Sheetsの所定セルに値を投入時の権限認証
+     *
+     * @param userId ユーザID
+     * @param request ServletRequest
+     * @return String
+     * @throws ServiceException
+     */
+    String authorize(String userId, ServletRequest request) throws ServiceException;
+
+    /**
+     * Google Sheetsの所定セルに値を投入時の権限認証
+     *
+     * @param userId ユーザID
+     * @param request ServletRequest
+     * @param code 権限認証
+     */
+    void credential(String userId, String code, ServletRequest request);
 }

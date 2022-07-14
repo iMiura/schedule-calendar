@@ -16,7 +16,7 @@ const routes: Routes = [
     component: LoginComponent
   },
   {
-    // 首页
+    // TOP PAGE
     path: 'home',
     component: NavbarComponent,
     children: [
@@ -37,7 +37,9 @@ const routes: Routes = [
 ];
 
 @NgModule({
+  // ローカル実行時、コメントアウトを外す
   imports: [RouterModule.forRoot(routes)],
+  // War作成時、コメントアウトを外す
   // imports: [RouterModule.forRoot(routes, {useHash: true})],
   exports: [RouterModule]
 })
