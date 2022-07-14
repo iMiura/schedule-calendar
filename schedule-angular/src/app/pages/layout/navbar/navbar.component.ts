@@ -16,7 +16,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   userIdentity: any;
   userName: any;
-  teamName: any;
+  roleName: any;
 
   constructor(private router: Router,
               private activeRoute: ActivatedRoute,
@@ -30,7 +30,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     that.userIdentity = this.localStorage.retrieve('userIdentity');
     if (that.userIdentity) {
       this.userName = that.userIdentity.userName;
-      this.teamName = that.userIdentity.teamName;
+      this.roleName = that.userIdentity.roleName;
     }
     const button = document.getElementById('signout_button');
     button.onclick = () => {

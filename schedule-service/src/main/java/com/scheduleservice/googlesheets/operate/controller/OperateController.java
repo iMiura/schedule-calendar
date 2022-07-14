@@ -54,6 +54,8 @@ public class OperateController {
             UserInfoEntity userInfo = iUserInfoService.getByGmail(taskOwner);
             if (userInfo != null) {
                 resultMap.put("message_owner", userInfo.getUserName());
+            } else {
+                resultMap.put("message_owner", "登録されてない利用者");
             }
         }
 

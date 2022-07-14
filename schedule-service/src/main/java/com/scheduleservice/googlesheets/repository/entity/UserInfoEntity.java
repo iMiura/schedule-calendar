@@ -40,6 +40,11 @@ public class UserInfoEntity implements Serializable {
     private Long teamId;
 
     /**
+     * 役割ID
+     */
+    private Long roleId;
+
+    /**
      * メールアドレス
      */
     private String gmailAddress;
@@ -65,4 +70,10 @@ public class UserInfoEntity implements Serializable {
      */
     @TableField(exist = false)
     private String teamName;
+
+    /**
+     * 役割名
+     */
+    @TableField(exist = false)
+    private String roleName;
 }
