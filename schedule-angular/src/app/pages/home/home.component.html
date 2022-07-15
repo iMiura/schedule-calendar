@@ -14,7 +14,7 @@
     <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-text" nzType="default" (click)="doPrevYm()" [disabled]="deployedYm==null || calendarYm<=startYm">◀</button>
     <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-small" nzType="default" (click)="doCurrentYm()" [disabled]="deployedYm==null">今月の表示</button>
     <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-text" nzType="default" (click)="doNextYm()" [disabled]="deployedYm==null || calendarYm>=deployedYm">▶</button>
-    <div *ngIf="(permission==0 || permission==1) && radioValue==2" style="display: inline-block; float: right; margin-right: 20px"><button nz-button [nzSize]="size" class="button-small" nzType="default" (click)="showConfirm($event)" [disabled]="message">ｶﾚﾝﾀﾞｰ確定</button></div>
+    <div *ngIf="(permission==0 || permission==1) && radioValue==2" style="display: inline-block; float: right; margin-right: 20px"><button nz-radio-button class="button-large" (click)="showConfirm($event)" [disabled]="message">② ｶﾚﾝﾀﾞｰ確定</button></div>
   </div>
 </h3>
 <div class="tab-wrap">
