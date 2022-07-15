@@ -2,10 +2,14 @@
   width: 100%;
 }
 
+#buttonParent {
+  height: 100%;
+  width: 100%;
+}
+
 #buttonDiv {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+  position: relative;
+  top: 30%;
   left: 0;
   right: 0;
   margin: auto;
@@ -16,10 +20,9 @@
 }
 
 #titleDiv {
-  position: absolute;
+  position: relative;
   font-size: 50px;
   top: 25%;
-  //bottom: 5;
   left: 0;
   right: 0;
   margin: auto;
