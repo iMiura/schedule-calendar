@@ -17,8 +17,8 @@ exports.config = {
   },
   directConnect: true,
   // baseUrl: 'http://localhost:4200/',
-  baseUrl: 'https://stg-prg-mng.u-car.co.jp/',
-  // baseUrl: 'https://prg-mng.u-car.co.jp/',
+  // baseUrl: 'https://stg-prg-mng.u-car.co.jp/',
+  baseUrl: 'https://prg-mng.u-car.co.jp/',
 
   framework: 'jasmine',
   jasmineNodeOpts: {

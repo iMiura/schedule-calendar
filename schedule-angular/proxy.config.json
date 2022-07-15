@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://stg.prg-mng.u-car.co.jp/",
+    "target": "https://prg-mng.u-car.co.jp/",
     "secure": false,
     "pathRewrite": {
       "^/api": ""
