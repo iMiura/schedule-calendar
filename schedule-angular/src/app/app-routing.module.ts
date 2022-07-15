@@ -38,9 +38,9 @@ const routes: Routes = [
 
 @NgModule({
   // ローカル実行時、コメントアウトを外す
-  imports: [RouterModule.forRoot(routes)],
+  // imports: [RouterModule.forRoot(routes)],
   // War作成時、コメントアウトを外す
-  // imports: [RouterModule.forRoot(routes, {useHash: true})],
+  imports: [RouterModule.forRoot(routes, {useHash: true})],
   exports: [RouterModule]
 })
 export class AppRoutingModule {
