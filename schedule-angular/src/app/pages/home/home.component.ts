@@ -18,7 +18,7 @@ import {LocalStorageService} from "ngx-webstorage";
 export class HomeComponent implements OnInit {
 
   radioValue = 0;
-  radioLabel = ['タスクリスト', '業務フロー', 'ｶﾚﾝﾀﾞｰ確定']
+  radioLabel = ['タスクリストベース進捗画面', '業務フローベース進捗画面', 'カレンダー展開画面']
   size: NzButtonSize = 'small';
   google_sheets_src: any;
 
