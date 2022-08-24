@@ -87,6 +87,10 @@ public class ShiroRealm extends AuthorizingRealm {
             throw new AuthenticationException("ログイン失敗しました。");
         }
 
+        if (!jwtService.verify(jwtToken)) {
+            throw new AuthenticationException("タイムアウトしました。再度ログインしてください。");
+        }
+
         String username = jwtService.getUsername(jwtToken);
         // 取出用户信息
         UserInfoEntity userInfo = userService.getByGmail(username);

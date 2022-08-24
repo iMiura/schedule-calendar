@@ -70,7 +70,6 @@ public class JwtService {
      */
     public boolean verify(String token) {
         try {
-            token = getToken(token);
             // パスワードでJWTバリデータ作成
             Algorithm algorithm = Algorithm.HMAC256(constant.getJwtSecretKey());
             JWTVerifier verifier = JWT.require(algorithm)
@@ -78,6 +77,7 @@ public class JwtService {
                     .withClaim("rememberMe", getRememberMe(token))
                     .build();
             // TOKEN検証
+            token = getToken(token);
             verifier.verify(token);
             return true;
         } catch (Exception exception) {
