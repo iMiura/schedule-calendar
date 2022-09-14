@@ -28,6 +28,10 @@ export class OperateComponent implements OnInit {
   col1: any;
   // 実績終了日列の座標
   col2: any;
+// 202209 業務フロー 作業時間見える化対応 w.w start
+  // 作業時間
+  col3: any;
+// 202209 業務フロー 作業時間見える化対応 w.w end
   // タスク担当者ID
   taskOwner: any;
 
@@ -65,6 +69,9 @@ export class OperateComponent implements OnInit {
     this.col0 = this.route.snapshot.queryParams.col0;
     this.col1 = this.route.snapshot.queryParams.col1;
     this.col2 = this.route.snapshot.queryParams.col2;
+// 202209 業務フロー 作業時間見える化対応 w.w start
+    this.col3 = this.route.snapshot.queryParams.col3;
+// 202209 業務フロー 作業時間見える化対応 w.w end
     this.taskOwner = this.route.snapshot.queryParams.taskOwner;
     this.ymShow = moment(this.ym + '01').format('yyyy年MM月度');
     this.query();
@@ -101,7 +108,10 @@ export class OperateComponent implements OnInit {
   }
 
   updateTimeInfo(status) {
-    let range = this.col1 + this.row + ':' + this.col2 + this.row;
+// 202209 業務フロー 作業時間見える化対応 w.w start
+//     let range = this.col1 + this.row + ':' + this.col2 + this.row;
+    let range = this.col1 + this.row + ':' + this.col2 + this.row + ':' + this.col3 + this.row;
+// 202209 業務フロー 作業時間見える化対応 w.w end
     this.operateService.updateTimeInfo(range, this.ym, this.timeRecordId, status, this.finalChangeDate).then(res => {
       // 成功
       if (res.body.code === ResponseEnum.SUCCESS) {

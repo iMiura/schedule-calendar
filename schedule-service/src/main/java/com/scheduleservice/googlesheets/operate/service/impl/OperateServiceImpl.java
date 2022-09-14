@@ -208,10 +208,36 @@ public class OperateServiceImpl implements OperateService {
             valueList.add(null);
         }
         valueList.add(String.valueOf(status));
+// 202209 業務フロー 作業時間見える化対応 w.w start
+
+        boolean updateFlg = iWorkTimeManagementService.updateTimeInfo(workTimeManagementEntity, localDateTime);
+
+// 作業時間管理情報取得
+        List<WorkTimeManagementEntity> list = iWorkTimeManagementService.getWorkTime(teamId, ym, workTimeManagementEntity.getTaskId());
+        // 作業時間
+        double times = 0;
+        for (WorkTimeManagementEntity item : list) {
+            // 作業時間を算出する
+            if (item.getTimeRecordEnd() != null) {
+                double difSec = (double) DateUtil.between(
+                    Date.from(item.getTimeRecordStart().atZone(ZoneId.systemDefault()).toInstant()),
+                    Date.from(item.getTimeRecordEnd().atZone(ZoneId.systemDefault()).toInstant()),
+                    DateUnit.SECOND) / 60;
+                times += difSec;
+            }
+        }
+        if (0 < times && times < 1) {
+            times = 1;
+        } else {
+            times = Math.ceil(times);
+        }
+        int workTimes = (int) times;
+        valueList.add(workTimes);
+// 202209 業務フロー 作業時間見える化対応 w.w end
         // Google Sheetsの所定セルに値を投入
         updateSheet(teamId, ym, range, valueList);
 
-        return iWorkTimeManagementService.updateTimeInfo(workTimeManagementEntity, localDateTime);
+        return updateFlg;
     }
 
     /**
