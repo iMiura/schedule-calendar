@@ -34,6 +34,12 @@ export class HomeComponent implements OnInit {
   userIdentity: any;
   teamName: any;
 
+  fvid: any;
+
+  isFilter: any;
+
+
+
   constructor(private http: HttpClient,
               private router: Router,
               private modal: NzModalService,
@@ -84,6 +90,7 @@ export class HomeComponent implements OnInit {
   }
 
   private getSheet() {
+    this.isFilter = false;
     this.google_sheets_src = '';
     this.finalChangeDate = '';
     this.homeService.showSheet(this.calendarYm, this.radioValue).then(res => {
@@ -98,6 +105,36 @@ export class HomeComponent implements OnInit {
       }
       // カレンダー展開の場合
       if (this.radioValue == 2) {
+        this.finalChangeDate = res.result.finalChangeDate;
+      } else {
+        this.listYm = this.calendarYm;
+      }
+    });
+  }
+
+  // tslint:disable-next-line:typedef
+  private getSheetFvid() {
+    this.isFilter = true;
+    this.google_sheets_src = '';
+    this.finalChangeDate = '';
+
+    // 本当はたぶんここからCreateFilterViewとかするんだと思う
+    this.homeService.showSheet(this.calendarYm, this.radioValue).then(res => {
+      this.permission = res.result.permission;
+      this.calendarYm = res.result.calendarYm;
+      this.ymShow = moment(this.calendarYm + '01').format('YYYY年MM月度');
+      this.deployedYm = res.result.deployedYm;
+      this.startYm = res.result.startYm;
+      this.message = res.result.message;
+
+      // 「森本」と空白のセルを抽出するid
+      this.fvid = '&fvid=575313287';
+
+      if (this.message == null) {
+        this.google_sheets_src = this.sanitizer.bypassSecurityTrustResourceUrl(res.result.listUrl + this.fvid);
+      }
+      // カレンダー展開の場合
+      if (this.radioValue === 2) {
         this.finalChangeDate = res.result.finalChangeDate;
       } else {
         this.listYm = this.calendarYm;

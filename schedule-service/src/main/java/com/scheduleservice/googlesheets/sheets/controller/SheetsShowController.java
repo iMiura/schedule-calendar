@@ -42,7 +42,22 @@ public class SheetsShowController {
         @RequestParam("ym") String calendarYm, @RequestParam("urlFlg") String urlFlg) {
         log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 開始（" + SessionUtil.getUserInfo().getUserName() + "）");
         // スプレッドシート情報取得
-        Map result = sheetsShowService.getGoogleSheetsInfo(calendarYm, urlFlg);
+        Map result = sheetsShowService.getGoogleSheetsInfo(calendarYm, urlFlg, false);
+        log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 完了（" + SessionUtil.getUserInfo().getUserName() + "）");
+        return new ResponseEntity<>(JsonResult.success(result), HttpStatus.OK);
+    }
+
+    /**
+     * スプレッドシートファイル表示
+     *
+     * @return json
+     */
+    @GetMapping("/showSheetFilter")
+    public ResponseEntity<JsonResult> showSheetFilter(
+            @RequestParam("ym") String calendarYm, @RequestParam("urlFlg") String urlFlg) {
+        log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 開始（" + SessionUtil.getUserInfo().getUserName() + "）");
+        // スプレッドシート情報取得
+        Map result = sheetsShowService.getGoogleSheetsInfo(calendarYm, urlFlg, true);
         log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 完了（" + SessionUtil.getUserInfo().getUserName() + "）");
         return new ResponseEntity<>(JsonResult.success(result), HttpStatus.OK);
     }

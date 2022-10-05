@@ -13,7 +13,7 @@ public interface SheetsShowService {
      *
      * @param calendarYm カレンダー年月度
      */
-    Map getGoogleSheetsInfo(String calendarYm, String urlFlg) throws ServiceException;
+    Map getGoogleSheetsInfo(String calendarYm, String urlFlg, boolean filterFlg) throws ServiceException;
 
     /**
      * カレンダー展開最終年月更新
