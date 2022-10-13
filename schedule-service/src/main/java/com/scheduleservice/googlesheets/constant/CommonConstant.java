@@ -21,6 +21,11 @@ public class CommonConstant {
     public static final String GID = "/edit#gid=";
 
     /**
+     * filterViewID
+     */
+    public static final String FVID = "&fvid=";
+
+    /**
      * システム運用開始年月度のプロパティ名
      */
     public static final String START_YM_KEY = "SYSTEM_OPERATION_START_YM";

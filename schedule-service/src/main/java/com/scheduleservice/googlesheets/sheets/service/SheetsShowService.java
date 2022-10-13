@@ -1,6 +1,9 @@
 package com.scheduleservice.googlesheets.sheets.service;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.scheduleservice.googlesheets.exception.ServiceException;
+
+import java.io.IOException;
 import java.util.Map;
 
 /**

@@ -119,7 +119,7 @@ export class HomeComponent implements OnInit {
     this.finalChangeDate = '';
 
     // 本当はたぶんここからCreateFilterViewとかするんだと思う
-    this.homeService.showSheet(this.calendarYm, this.radioValue).then(res => {
+    this.homeService.showSheetFilter(this.calendarYm, this.radioValue).then(res => {
       this.permission = res.result.permission;
       this.calendarYm = res.result.calendarYm;
       this.ymShow = moment(this.calendarYm + '01').format('YYYY年MM月度');
@@ -128,10 +128,10 @@ export class HomeComponent implements OnInit {
       this.message = res.result.message;
 
       // 「森本」と空白のセルを抽出するid
-      this.fvid = '&fvid=575313287';
+      // this.fvid = '&fvid=575313287';
 
       if (this.message == null) {
-        this.google_sheets_src = this.sanitizer.bypassSecurityTrustResourceUrl(res.result.listUrl + this.fvid);
+        this.google_sheets_src = this.sanitizer.bypassSecurityTrustResourceUrl(res.result.listUrl);
       }
       // カレンダー展開の場合
       if (this.radioValue === 2) {

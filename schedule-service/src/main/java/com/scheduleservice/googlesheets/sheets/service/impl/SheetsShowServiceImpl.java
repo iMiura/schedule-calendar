@@ -1,5 +1,9 @@
 package com.scheduleservice.googlesheets.sheets.service.impl;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.AddFilterViewResponse;
 import com.scheduleservice.googlesheets.config.CustomMessageResource;
 import com.scheduleservice.googlesheets.constant.CommonConstant;
 import com.scheduleservice.googlesheets.exception.ServiceException;
@@ -12,7 +16,10 @@ import com.scheduleservice.googlesheets.repository.service.ISystemPropertyServic
 import com.scheduleservice.googlesheets.repository.service.IWorkYmInfoService;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.sheets.service.SheetsShowService;
+import com.scheduleservice.googlesheets.util.CreateFilterView;
 import com.scheduleservice.googlesheets.util.DateUtil;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,8 +49,12 @@ public class SheetsShowServiceImpl implements SheetsShowService {
     @Autowired
     private CustomMessageResource messageSource;
 
+    /** Sheet service. */
+    private Sheets sheetsService;
+
     @Override
-    public Map getGoogleSheetsInfo(String calendarYm, String urlFlg, boolean filterFlg) throws ServiceException {
+    @Transactional(rollbackFor = {GoogleJsonResponseException.class, IOException.class})
+    public Map getGoogleSheetsInfo(String calendarYm, String urlFlg, boolean filterFlg) throws ServiceException  {
         // カレンダー年月度
         if (!StringUtils.hasLength(calendarYm)) {
             LocalDate date = LocalDate.now();
@@ -104,10 +115,20 @@ public class SheetsShowServiceImpl implements SheetsShowService {
             if (googleSheetsInfoEntity != null) {
                 // タスクリスト
                 if ("0".equals(urlFlg)) {
+
+                    AddFilterViewResponse res = CreateFilterView.addFilter(sheetsService, googleSheetsInfoEntity
+                                .getTaskListFileId(), Integer.parseInt(googleSheetsInfoEntity.getTaskListSheetId()));
+
+
                     listUrl =
                         googleSheetsInfoEntity.getGoogleSheetsFileUrl() + googleSheetsInfoEntity
                             .getTaskListFileId() + CommonConstant.GID + googleSheetsInfoEntity
                             .getTaskListSheetId();
+
+                    if (res != null) {
+                        listUrl += CommonConstant.FVID + res.getFilter().getFilterViewId().toString();
+                    }
+
                     log.debug("Google Sheets の情報（ファイルID：" + googleSheetsInfoEntity.getTaskListFileId()
                         + "、シート名：" + googleSheetsInfoEntity.getTaskListSheetName() + "）");
                     //業務フロー

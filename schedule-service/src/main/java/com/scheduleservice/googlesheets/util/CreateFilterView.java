@@ -25,17 +25,14 @@ public class CreateFilterView {
      * @return result
      * @throws IOException
      */
-    public static AddFilterViewResponse addFilter(Sheets sheetsService,
-                                                    String spreadsheetId,
-                                                    String valueInputOption,
-    Integer sheetId)
-            throws IOException {
+    /** Sheet service. */
+    private Sheets sheetsService;
+
+    public static AddFilterViewResponse addFilter(Sheets sheetsService, String spreadsheetId, Integer sheetId) throws IOException {
 
         AddFilterViewResponse result =null;
         try {
-
-
-            sheetId = 161445681;
+//            sheetId = 161445681;
             GridRange gridRange = new GridRange()
                     .setSheetId(sheetId)
                     .setStartRowIndex(0)
@@ -67,8 +64,8 @@ public class CreateFilterView {
 //            スプレッドシート内の複数の値の範囲を更新するためのリクエスト。
 //            これは、Google Sheets API を使用するときに HTTP 経由で送信される JSON を解析/シリアル化する方法を指定する Java データ モデル クラスです。詳細な説明については、 https://developers.google.com/api-client-library/java/google-http-java-client/json を参照してください。
 
-            BatchUpdateValuesRequest body = new BatchUpdateValuesRequest()
-                    .setValueInputOption(valueInputOption);
+            BatchUpdateValuesRequest body = new BatchUpdateValuesRequest();
+//                    .setValueInputOption(valueInputOption);
 //                    .setData(data);
             sheetsService.spreadsheets().values().batchUpdate(spreadsheetId, body).execute();
 
