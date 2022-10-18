@@ -43,7 +43,7 @@ public class SheetsShowServiceImpl implements SheetsShowService {
     private CustomMessageResource messageSource;
 
     @Override
-    public Map getGoogleSheetsInfo(String calendarYm, String urlFlg) throws ServiceException {
+    public Map getGoogleSheetsInfo(String calendarYm, String urlFlg, boolean filterFlg) throws ServiceException {
         // カレンダー年月度
         if (!StringUtils.hasLength(calendarYm)) {
             LocalDate date = LocalDate.now();

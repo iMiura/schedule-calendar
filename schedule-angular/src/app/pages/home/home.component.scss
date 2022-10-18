@@ -13,8 +13,16 @@ iframe {
   border: none;
   width: 100%;
   height: 900px;
-  margin-top: -151px;
   margin-left: -90px;
+}
+
+.iframe-no-filterview {
+  margin-top: -151px;
+}
+
+.iframe-with-filterview {
+  margin-top: -191px;
+  height: 940px;
 }
 
 .iframe-container {
