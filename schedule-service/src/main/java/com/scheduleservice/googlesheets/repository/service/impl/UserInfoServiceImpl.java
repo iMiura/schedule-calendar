@@ -5,6 +5,7 @@ import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
 import com.scheduleservice.googlesheets.repository.mapper.UserInfoMapper;
 import com.scheduleservice.googlesheets.repository.service.IUserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,4 +26,10 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfoEnt
         return getOne(queryWrapper);
     }
 
+    @Override
+    public List<UserInfoEntity> getUserList() {
+        LambdaQueryWrapper<UserInfoEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserInfoEntity::getDelFlg, 0).ne(UserInfoEntity::getRoleId, 6);
+        return list(queryWrapper);
+    }
 }

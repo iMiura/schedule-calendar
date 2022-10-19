@@ -33,12 +33,11 @@ export class HomeComponent implements OnInit {
   finalChangeDate: any;
   userIdentity: any;
   teamName: any;
-
-  fvid: any;
-
+  userList: any;
+  currentUserId: any;
+  listUserId: any;
+  userId: any;
   isFilter: any;
-
-
 
   constructor(private http: HttpClient,
               private router: Router,
@@ -61,6 +60,10 @@ export class HomeComponent implements OnInit {
         this.radioValue = 2;
       }
     }
+    this.currentUserId = '';
+    this.listUserId = '';
+    this.userId = '';
+    this.getUserList();
     this.getSheet();
   }
 
@@ -70,6 +73,17 @@ export class HomeComponent implements OnInit {
       this.calendarYm = '';
     } else {
       this.calendarYm = this.listYm;
+    }
+    // タスクリストベース進捗画面の場合
+    if (this.radioValue == 0) {
+      this.currentUserId = this.listUserId;
+    } else {
+      this.currentUserId = '';
+    }
+    if (this.currentUserId) {
+      this.isFilter = true;
+    } else {
+      this.isFilter = false;
     }
     this.getSheet();
   }
@@ -90,10 +104,9 @@ export class HomeComponent implements OnInit {
   }
 
   private getSheet() {
-    this.isFilter = false;
     this.google_sheets_src = '';
     this.finalChangeDate = '';
-    this.homeService.showSheet(this.calendarYm, this.radioValue).then(res => {
+    this.homeService.showSheet(this.calendarYm, this.radioValue, this.currentUserId).then(res => {
       this.permission = res.result.permission;
       this.calendarYm = res.result.calendarYm;
       this.ymShow = moment(this.calendarYm + '01').format('YYYY年MM月度');
@@ -102,49 +115,15 @@ export class HomeComponent implements OnInit {
       this.message = res.result.message;
       if (this.message == null) {
         this.google_sheets_src = this.sanitizer.bypassSecurityTrustResourceUrl(res.result.listUrl);
+        // Fvid登録無しユーザは、画面表示調整しない
+        if (this.google_sheets_src.changingThisBreaksApplicationSecurity.includes('fvid')) {
+          this.isFilter = true;
+        } else {
+          this.isFilter = false;
+        }
       }
       // カレンダー展開の場合
       if (this.radioValue == 2) {
-        this.finalChangeDate = res.result.finalChangeDate;
-      } else {
-        this.listYm = this.calendarYm;
-      }
-    });
-  }
-
-  private getSheetFvid() {
-    this.isFilter = true;
-    this.google_sheets_src = '';
-    this.finalChangeDate = '';
-
-    // シートの表示
-    this.homeService.showSheet(this.calendarYm, this.radioValue).then(res => {
-      this.permission = res.result.permission;
-      this.calendarYm = res.result.calendarYm;
-      this.ymShow = moment(this.calendarYm + '01').format('YYYY年MM月度');
-      this.deployedYm = res.result.deployedYm;
-      this.startYm = res.result.startYm;
-      this.message = res.result.message;
-
-      // 「森本」と空白のセルを抽出するid
-      // (「進捗管理システム用」は用意しない)
-      // シート名は「202210」
-      // 井上, 773028517
-      // 小川, 766599375
-      // 久保田, 1022444964
-      // 森本, 756757726
-      // 泉川, 329032137
-      // 岸水, 216574100
-      // 秋元, 859129628
-      // 葉上, 1196469509
-      // 桑名, 1667118827
-      this.fvid = '&fvid=756757726';
-
-      if (this.message == null) {
-        this.google_sheets_src = this.sanitizer.bypassSecurityTrustResourceUrl(res.result.listUrl + this.fvid);
-      }
-      // カレンダー展開の場合
-      if (this.radioValue === 2) {
         this.finalChangeDate = res.result.finalChangeDate;
       } else {
         this.listYm = this.calendarYm;
@@ -184,5 +163,22 @@ export class HomeComponent implements OnInit {
         return;
       }
     });
+  }
+
+  private getUserList() {
+    this.homeService.showUserList().then(res => {
+      this.userList = res.result.userList;
+    });
+  }
+
+  private setSheetFvid() {
+    this.currentUserId = this.userId;
+    this.listUserId = this.userId;
+    if (this.userId) {
+      this.isFilter = true;
+    } else {
+      this.isFilter = false;
+    }
+    this.getSheet();
   }
 }

@@ -14,10 +14,16 @@
     <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-text" nzType="default" (click)="doPrevYm()" [disabled]="deployedYm==null || calendarYm<=startYm">◀</button>
     <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-small" nzType="default" (click)="doCurrentYm()" [disabled]="deployedYm==null">今月の表示</button>
     <button *ngIf="radioValue!=2" nz-button [nzSize]="size" class="button-text" nzType="default" (click)="doNextYm()" [disabled]="deployedYm==null || calendarYm>=deployedYm">▶</button>
+    <nz-select *ngIf="radioValue==0" [nzDropdownMatchSelectWidth]=false style="margin-right: 10px; width: 150px" [(ngModel)]="userId">
+      <nz-option nzLabel="（全員を表示）" nzValue="">
+      </nz-option>
+      <ng-container *ngFor="let item of userList;">
+        <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+        </nz-option>
+      </ng-container>
+    </nz-select>
+    <button *ngIf="radioValue==0" nz-button [nzSize]="size" class="button-small" nzType="default" (click)="setSheetFvid()" [disabled]="deployedYm==null">担当者切替</button>
     <div *ngIf="(permission==0 || permission==1) && radioValue==2" style="display: inline-block; float: right; margin-right: 20px"><button nz-radio-button class="button-large" (click)="showConfirm($event)" [disabled]="message">② ｶﾚﾝﾀﾞｰ確定</button></div>
-  </div>
-  <div>
-    <button *ngIf="radioValue==0" nz-button [nzSize]="size" class="button-small" nzType="default" (click)="getSheetFvid()" [disabled]="deployedYm==null">担当者切替</button>
   </div>
 </h3>
 <div class="tab-wrap">

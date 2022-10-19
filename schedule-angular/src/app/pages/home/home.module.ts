@@ -16,6 +16,7 @@ import {NzRadioModule} from "ng-zorro-antd/radio";
 import {NzFormModule} from 'ng-zorro-antd/form';
 import {NzSpaceModule} from "ng-zorro-antd/space";
 import {FormsModule} from "@angular/forms";
+import {NzSelectModule} from "ng-zorro-antd/select";
 
 @NgModule({
   declarations: [HomeComponent],
@@ -34,7 +35,8 @@ import {FormsModule} from "@angular/forms";
     NzPageHeaderModule,
     NzToolTipModule,
     NzCardModule,
-    NzListModule
+    NzListModule,
+    NzSelectModule
   ]
 })
 export class HomeModule {

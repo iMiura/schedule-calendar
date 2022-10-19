@@ -13,7 +13,7 @@ public interface SheetsShowService {
      *
      * @param calendarYm カレンダー年月度
      */
-    Map getGoogleSheetsInfo(String calendarYm, String urlFlg, boolean filterFlg) throws ServiceException;
+    Map getGoogleSheetsInfo(String calendarYm, String urlFlg, String userId) throws ServiceException;
 
     /**
      * カレンダー展開最終年月更新
@@ -22,4 +22,9 @@ public interface SheetsShowService {
      * @param finalChangeDate 最終更新日時
      */
     boolean updateCalendarDeployed(String deployedYm, String finalChangeDate) throws ServiceException;
+
+    /**
+     * フィルタ対象担当者プルダウンの選択肢取得
+     */
+    Map getUserList() throws ServiceException;
 }

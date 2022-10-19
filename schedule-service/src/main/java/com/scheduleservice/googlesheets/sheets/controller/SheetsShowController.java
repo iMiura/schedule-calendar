@@ -39,25 +39,10 @@ public class SheetsShowController {
      */
     @GetMapping("/showSheet")
     public ResponseEntity<JsonResult> showSheet(
-        @RequestParam("ym") String calendarYm, @RequestParam("urlFlg") String urlFlg) {
+        @RequestParam("ym") String calendarYm, @RequestParam("urlFlg") String urlFlg, @RequestParam("userId") String userId) {
         log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 開始（" + SessionUtil.getUserInfo().getUserName() + "）");
         // スプレッドシート情報取得
-        Map result = sheetsShowService.getGoogleSheetsInfo(calendarYm, urlFlg, false);
-        log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 完了（" + SessionUtil.getUserInfo().getUserName() + "）");
-        return new ResponseEntity<>(JsonResult.success(result), HttpStatus.OK);
-    }
-
-    /**
-     * スプレッドシートファイル表示
-     *
-     * @return json
-     */
-    @GetMapping("/showSheetFilter")
-    public ResponseEntity<JsonResult> showSheetFilter(
-            @RequestParam("ym") String calendarYm, @RequestParam("urlFlg") String urlFlg) {
-        log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 開始（" + SessionUtil.getUserInfo().getUserName() + "）");
-        // スプレッドシート情報取得
-        Map result = sheetsShowService.getGoogleSheetsInfo(calendarYm, urlFlg, true);
+        Map result = sheetsShowService.getGoogleSheetsInfo(calendarYm, urlFlg, userId);
         log.debug("スプレッドシート情報表示" + CommonConstant.RADIO_LABEL[Integer.parseInt(urlFlg)] + " 完了（" + SessionUtil.getUserInfo().getUserName() + "）");
         return new ResponseEntity<>(JsonResult.success(result), HttpStatus.OK);
     }
@@ -80,5 +65,19 @@ public class SheetsShowController {
             return new ResponseEntity<>(JsonResult.failed(messageSource.getMessage("errors.exclusive.calendar.expansion")), HttpStatus.OK);
         }
 
+    }
+
+    /**
+     * フィルタ対象担当者プルダウンの選択肢取得
+     *
+     * @return json
+     */
+    @GetMapping("/showUserList")
+    public ResponseEntity<JsonResult> showUserList() {
+        log.debug("フィルタ対象担当者プルダウンの選択肢取得 開始（" + SessionUtil.getUserInfo().getUserName() + "）");
+        // スプレッドシート情報取得
+        Map result = sheetsShowService.getUserList();
+        log.debug("フィルタ対象担当者プルダウンの選択肢取得 完了（" + SessionUtil.getUserInfo().getUserName() + "）");
+        return new ResponseEntity<>(JsonResult.success(result), HttpStatus.OK);
     }
 }

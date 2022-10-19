@@ -4,11 +4,15 @@ import com.scheduleservice.googlesheets.config.CustomMessageResource;
 import com.scheduleservice.googlesheets.constant.CommonConstant;
 import com.scheduleservice.googlesheets.exception.ServiceException;
 import com.scheduleservice.googlesheets.repository.entity.CalendarDeployedManagementEntity;
+import com.scheduleservice.googlesheets.repository.entity.FilterViewInfoEntity;
 import com.scheduleservice.googlesheets.repository.entity.GoogleSheetsInfoEntity;
+import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
 import com.scheduleservice.googlesheets.repository.entity.WorkYmInfoEntity;
 import com.scheduleservice.googlesheets.repository.service.ICalendarDeployedManagementService;
+import com.scheduleservice.googlesheets.repository.service.IFilterViewInfoService;
 import com.scheduleservice.googlesheets.repository.service.IGoogleSheetsInfoService;
 import com.scheduleservice.googlesheets.repository.service.ISystemPropertyService;
+import com.scheduleservice.googlesheets.repository.service.IUserInfoService;
 import com.scheduleservice.googlesheets.repository.service.IWorkYmInfoService;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.sheets.service.SheetsShowService;
@@ -16,7 +20,9 @@ import com.scheduleservice.googlesheets.util.DateUtil;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +46,14 @@ public class SheetsShowServiceImpl implements SheetsShowService {
     @Autowired
     private IWorkYmInfoService iWorkYmInfoService;
     @Autowired
+    private IUserInfoService iUserInfoService;
+    @Autowired
+    private IFilterViewInfoService iFilterViewInfoService;
+    @Autowired
     private CustomMessageResource messageSource;
 
     @Override
-    public Map getGoogleSheetsInfo(String calendarYm, String urlFlg, boolean filterFlg) throws ServiceException {
+    public Map getGoogleSheetsInfo(String calendarYm, String urlFlg, String userId) throws ServiceException {
         // カレンダー年月度
         if (!StringUtils.hasLength(calendarYm)) {
             LocalDate date = LocalDate.now();
@@ -158,6 +168,15 @@ public class SheetsShowServiceImpl implements SheetsShowService {
             }
         }
 
+        // フィルターの場合
+        if (StringUtils.hasLength(userId)) {
+            FilterViewInfoEntity filterViewInfoEntity = iFilterViewInfoService.getFilterViewInfo(teamId, Long.parseLong(userId), calendarYm);
+            if (filterViewInfoEntity != null) {
+                listUrl = listUrl + "&fvid=" + filterViewInfoEntity.getFilterViewId();
+                log.debug("Google Sheets の情報（フィルターID：" + filterViewInfoEntity.getFilterViewId() + "）");
+            }
+        }
+
         result.put("listUrl", listUrl);
         result.put("message", message);
 
@@ -178,5 +197,21 @@ public class SheetsShowServiceImpl implements SheetsShowService {
         LocalDateTime localDateTime = DateUtil.parseUnixMilli(Long.parseLong(finalChangeDate));
 
         return iCalendarDeployedManagementService.updateCalendarDeployed(calendarDeployedManagement, localDateTime);
+    }
+
+    @Override
+    public Map getUserList() throws ServiceException {
+        Map result = new HashMap();
+        List<UserInfoEntity> list = iUserInfoService.getUserList();
+        List<Map> userList = new ArrayList<>();
+        for (UserInfoEntity userInfoEntity : list) {
+            Map user = new HashMap();
+            user.put("label", userInfoEntity.getUserName());
+            user.put("value", userInfoEntity.getUserId());
+            userList.add(user);
+        }
+        result.put("userList", userList);
+
+        return result;
     }
 }

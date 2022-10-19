@@ -2,6 +2,7 @@ package com.scheduleservice.googlesheets.repository.service;
 
 import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import java.util.List;
 
 /**
  * <p>
@@ -21,4 +22,10 @@ public interface IUserInfoService extends IService<UserInfoEntity> {
      */
     UserInfoEntity getByGmail(String gmail);
 
+    /**
+     * 作業時間管理情報取得
+     *
+     * @return List<UserInfoEntity>
+     */
+    List<UserInfoEntity> getUserList();
 }
