@@ -23,6 +23,8 @@
       </ng-container>
     </nz-select>
     <button *ngIf="radioValue==0" nz-button [nzSize]="size" class="button-small" nzType="default" (click)="setSheetFvid()" [disabled]="deployedYm==null">担当者切替</button>
+    <input type="text" value="" name="txtSlack" #slack_text />
+    <button nz-button [nzSize]="size" class="button-small" nzType="default" (click)="sendSlack(slack_text.value)" [disabled]="deployedYm==null">Slack</button>
     <div *ngIf="(permission==0 || permission==1) && radioValue==2" style="display: inline-block; float: right; margin-right: 20px"><button nz-radio-button class="button-large" (click)="showConfirm($event)" [disabled]="message">② ｶﾚﾝﾀﾞｰ確定</button></div>
   </div>
 </h3>

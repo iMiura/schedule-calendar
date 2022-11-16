@@ -38,6 +38,7 @@ export class HomeComponent implements OnInit {
   listUserId: any;
   userId: any;
   isFilter: any;
+  slackText: any;
 
   constructor(private http: HttpClient,
               private router: Router,
@@ -63,6 +64,8 @@ export class HomeComponent implements OnInit {
     this.currentUserId = '';
     this.listUserId = '';
     this.userId = '';
+    this.slackText = '';
+
     this.getUserList();
     this.getSheet();
   }
@@ -180,5 +183,19 @@ export class HomeComponent implements OnInit {
       this.isFilter = false;
     }
     this.getSheet();
+  }
+
+  sendSlack(slackText): void {
+    const that = this;
+    that.slackText = slackText;
+
+    console.log(that.slackText);
+    console.log(slackText);
+
+    this.homeService.sendSlack(that.slackText).then(res => {
+      // this.userList = res.result.userList;
+      return;
+    });
+
   }
 }

@@ -17,6 +17,8 @@ import com.scheduleservice.googlesheets.repository.service.IWorkYmInfoService;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.sheets.service.SheetsShowService;
 import com.scheduleservice.googlesheets.util.DateUtil;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,11 +26,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import com.slack.api.Slack;
+import com.slack.api.webhook.Payload;
+import com.slack.api.webhook.WebhookResponse;
 
 /**
  * ユーザー情報 関連ビジネスロジックオブジェクト.
@@ -214,4 +221,25 @@ public class SheetsShowServiceImpl implements SheetsShowService {
 
         return result;
     }
+
+    @Override
+    public Map sendSlack(String message) throws ServiceException, IOException {
+
+        log.debug("Slackへ送信 開始です");
+        Slack slack = Slack.getInstance();
+        String webhookUrl = "https://hooks.slack.com/services/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";
+
+        Payload payload = Payload.builder().text(message).build();
+
+        WebhookResponse response = slack.send(webhookUrl, payload);
+
+        log.debug("Slackへ送信 完了です");
+        log.debug(String.valueOf(response));
+
+        return new HashMap();
+
+
+    }
+
 }
+
