@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.slack.api.SlackConfig;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
@@ -290,14 +291,24 @@ public class SheetsShowServiceImpl implements SheetsShowService {
 
             log.debug("Slackへ送信 開始です");
             try {
-                Slack slack = Slack.getInstance();
+
+                SlackConfig config = new SlackConfig();
+                config.setStatsEnabled(false);
+                Slack slack = Slack.getInstance(config);
 
                 // 環境変数を読み込みます
                 // トークンがボットトークンであれば `xoxb-`、ユーザートークンであれば `xoxp-` で始まっているはずです
 
+                // Googleのアカウントと同じような感じで、トークンのローテーションが必要？
+//                https://api.slack.com/authentication/rotation
+//                https://qiita.com/seratch/items/610c14208772d49ac9e4
+//                https://github.com/slackapi/java-slack-sdk/blob/v1.14.0/bolt-servlet/src/test/java/samples/OAuthSample.java
+
+//              もしかするとマニフェストファイルの設定で、↑の処理要らなくなる可能性もあるけど・・・24時間後とかに分かりそう。
+
                 // このトークンはハードコーディングから外す
                 String token = System.getenv("SLACK_TOKEN");
-                token = "xoxb-4065614398534-4087022314564-ulHZyqlaMdWRzUxvnuMeJIlb";
+                token = "xoxb-4065614398534-4113244260229-rtVMPzyZQms2FwPuzESeCSZ6";
 
 //                log.debug(token);
 
