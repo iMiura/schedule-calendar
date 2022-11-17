@@ -19,14 +19,26 @@ import com.scheduleservice.googlesheets.sheets.service.SheetsShowService;
 import com.scheduleservice.googlesheets.util.DateUtil;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import com.slack.api.model.Message;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +48,16 @@ import org.springframework.util.StringUtils;
 import com.slack.api.Slack;
 import com.slack.api.webhook.Payload;
 import com.slack.api.webhook.WebhookResponse;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.SocketException;
+
 
 /**
  * ユーザー情報 関連ビジネスロジックオブジェクト.
@@ -222,23 +244,188 @@ public class SheetsShowServiceImpl implements SheetsShowService {
         return result;
     }
 
+    @SneakyThrows
     @Override
     public Map sendSlack(String message) throws ServiceException, IOException {
 
-        log.debug("Slackへ送信 開始です");
-        Slack slack = Slack.getInstance();
-        String webhookUrl = "https://hooks.slack.com/services/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";
+        if (message.equals("ftpup")) {
+            if (connect()) {
+                if (login()) {
+                    ftpUpLoad();
+                    disConnect();
+                } else {
+                    log.debug("ftpログイン失敗");
+                }
+            } else {
+                log.debug("ftp接続失敗");
+            }
 
-        Payload payload = Payload.builder().text(message).build();
+        } else if (message.equals("ftpdown")) {
+            if (connect()) {
+                if (login()) {
+                    ftpDownLoad();
+                    disConnect();
+                } else {
+                    log.debug("ftpログイン失敗・・・");
+                }
+            } else {
+                log.debug("fpt接続失敗・・・");
+            }
+        } else if (message.equals("read")) {
+            // タイムスタンプ（最終更新日時を確認）
 
-        WebhookResponse response = slack.send(webhookUrl, payload);
+            Path p = Paths.get("C:\\Users\\user\\Documents\\personList.csv");
 
-        log.debug("Slackへ送信 完了です");
-        log.debug(String.valueOf(response));
+            try {
+                FileTime fileTime = Files.getLastModifiedTime(p);
+                Instant instant = fileTime.toInstant();
+                LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
 
+                System.out.println(localDateTime);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+
+        } else {
+
+            log.debug("Slackへ送信 開始です");
+            try {
+                Slack slack = Slack.getInstance();
+
+                // 環境変数を読み込みます
+                // トークンがボットトークンであれば `xoxb-`、ユーザートークンであれば `xoxp-` で始まっているはずです
+
+                // このトークンはハードコーディングから外す
+                String token = System.getenv("SLACK_TOKEN");
+                token = "xoxb-4065614398534-4087022314564-ulHZyqlaMdWRzUxvnuMeJIlb";
+
+//                log.debug(token);
+
+                ChatPostMessageResponse response = slack.methods(token).chatPostMessage(req -> req
+                        .channel("#test") // チャンネル名を指定。
+                        .threadTs("1668668610.604149") // スレッドに書き込む場合はスレッドを指定。必須項目ではない。
+                        .text(message));
+                if (response.isOk()) {
+                    Message postedMessage = response.getMessage();
+                    log.debug(String.valueOf(postedMessage));
+                } else {
+                    String errorCode = response.getError(); // 例: "invalid_auth", "channel_not_found"
+                    log.debug(errorCode);
+                }
+
+                log.debug(response.getTs() + "←新規スレッド作成直後のthreadTsを、次回以降指定することでスレッドの特定ができる。");
+
+            } catch (SlackApiException requestFailure) {
+                // Slack API が 20x 以外の HTTP ステータスで応答した
+                requestFailure.printStackTrace();
+            } catch (IOException connectivityIssue) {
+                // 何らかの接続の問題が発生した
+                connectivityIssue.printStackTrace();
+            } finally {
+                log.debug("Slackへ送信 完了です");
+            }
+
+        }
         return new HashMap();
 
+    }
 
+    private FTPClient cli;
+
+    // 接続
+    public boolean connect() {
+        int rep;
+
+        System.out.print("start: connect\r\n");
+        try {
+            cli = new FTPClient();
+            cli.setDataTimeout(60000);
+            cli.connect("localhost");
+            rep = cli.getReplyCode();
+            if (!FTPReply.isPositiveCompletion(rep)) {
+                return false;
+            }
+            System.out.print("end: connect\r\n");
+            return true;
+        } catch (SocketException e) {
+            return false;
+        } catch (IOException ie) {
+            return false;
+        }
+    }
+
+    // ログイン
+    public boolean login() {
+        System.out.print("start: login\r\n");
+        try {
+            if (!cli.login("ftp", "password")) {
+                return false;
+            }
+            System.out.print("end: login\r\n");
+            return true;
+        } catch (IOException ie) {
+            return false;
+        }
+    }
+
+    // ダウンロード
+    public void ftpDownLoad() {
+        FileOutputStream outputstream;
+        boolean isRetrieve;
+
+        System.out.print("start: downLoad\r\n");
+        try {
+            // 実際のコードではディレクトリ構成は直書きしない
+            outputstream =
+                    new FileOutputStream("C:\\Users\\user\\Documents\\personList.csv");
+            isRetrieve =
+                    cli.retrieveFile("personList.csv", outputstream);
+            outputstream.close();
+            if (!isRetrieve) {
+                System.out.print("error: downLoad\r\n");
+            }
+            System.out.print("end: downLoad\r\n");
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
+
+    //アップロード
+    private void ftpUpLoad() {
+        FileInputStream inputstream;
+        boolean isStore;
+
+        System.out.print("start: upLoad\r\n");
+        try {
+            // 実際のコードではディレクトリ構成は直書きしない
+            inputstream =
+                    new FileInputStream("C:\\Users\\user\\Documents\\personList.csv");
+            isStore =
+                    cli.storeFile("personList.csv",
+                            inputstream);
+            inputstream.close();
+            if (!isStore) {
+                System.out.print("error: upLoad\r\n");
+            }
+            System.out.print("end: upLoad\r\n");
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
+
+    // 切断
+    public boolean disConnect() {
+
+        System.out.print("start: disConnect\r\n");
+        try {
+            if (cli != null && cli.isConnected()) {
+                cli.disconnect();
+            }
+            System.out.print("end: disConnect\r\n");
+            return true;
+        } catch (IOException ie) {
+            return false;
+        }
     }
 
 }

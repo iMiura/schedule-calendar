@@ -143,6 +143,12 @@
       <version>1.27.0</version>
     </dependency>
 
+    <!-- FTP用のアーティファクト -->
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>3.8.0</version>
+    </dependency>
 
   </dependencies>
 
