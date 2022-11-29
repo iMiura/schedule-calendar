@@ -249,45 +249,7 @@ public class SheetsShowServiceImpl implements SheetsShowService {
     @Override
     public Map sendSlack(String message) throws ServiceException, IOException {
 
-        if (message.equals("ftpup")) {
-            if (connect()) {
-                if (login()) {
-                    ftpUpLoad();
-                    disConnect();
-                } else {
-                    log.debug("ftpログイン失敗");
-                }
-            } else {
-                log.debug("ftp接続失敗");
-            }
 
-        } else if (message.equals("ftpdown")) {
-            if (connect()) {
-                if (login()) {
-                    ftpDownLoad();
-                    disConnect();
-                } else {
-                    log.debug("ftpログイン失敗・・・");
-                }
-            } else {
-                log.debug("fpt接続失敗・・・");
-            }
-        } else if (message.equals("read")) {
-            // タイムスタンプ（最終更新日時を確認）
-
-            Path p = Paths.get("C:\\Users\\user\\Documents\\personList.csv");
-
-            try {
-                FileTime fileTime = Files.getLastModifiedTime(p);
-                Instant instant = fileTime.toInstant();
-                LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-
-                System.out.println(localDateTime);
-            } catch (IOException e) {
-                System.out.println(e);
-            }
-
-        } else {
 
             log.debug("Slackへ送信 開始です");
             try {
@@ -308,7 +270,7 @@ public class SheetsShowServiceImpl implements SheetsShowService {
 
                 // このトークンはハードコーディングから外す
                 String token = System.getenv("SLACK_TOKEN");
-                token = "xoxb-4065614398534-4113244260229-rtVMPzyZQms2FwPuzESeCSZ6";
+                token = "xoxb-4065614398534-4402810386176-xjnyFIHBpPsOASTCG1ryvL6K";
 
 //                log.debug(token);
 
@@ -334,7 +296,6 @@ public class SheetsShowServiceImpl implements SheetsShowService {
                 connectivityIssue.printStackTrace();
             } finally {
                 log.debug("Slackへ送信 完了です");
-            }
 
         }
         return new HashMap();
