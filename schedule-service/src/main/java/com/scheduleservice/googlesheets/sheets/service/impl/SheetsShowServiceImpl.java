@@ -268,9 +268,11 @@ public class SheetsShowServiceImpl implements SheetsShowService {
 
 //              もしかするとマニフェストファイルの設定で、↑の処理要らなくなる可能性もあるけど・・・24時間後とかに分かりそう。
 
+//                時々ボットが削除されてしまう・・・
+
                 // このトークンはハードコーディングから外す
                 String token = System.getenv("SLACK_TOKEN");
-                token = "xoxb-4065614398534-4402810386176-xjnyFIHBpPsOASTCG1ryvL6K";
+                token = "xoxb-4065614398534-4402810386176-JPvLn093YmAus3l7qB5mMMcI";
 
 //                log.debug(token);
 
@@ -302,103 +304,6 @@ public class SheetsShowServiceImpl implements SheetsShowService {
 
     }
 
-    private FTPClient cli;
-
-    // 接続
-    public boolean connect() {
-        int rep;
-
-        System.out.print("start: connect\r\n");
-        try {
-            cli = new FTPClient();
-            cli.setDataTimeout(60000);
-            cli.connect("localhost");
-            rep = cli.getReplyCode();
-            if (!FTPReply.isPositiveCompletion(rep)) {
-                return false;
-            }
-            System.out.print("end: connect\r\n");
-            return true;
-        } catch (SocketException e) {
-            return false;
-        } catch (IOException ie) {
-            return false;
-        }
-    }
-
-    // ログイン
-    public boolean login() {
-        System.out.print("start: login\r\n");
-        try {
-            if (!cli.login("ftp", "password")) {
-                return false;
-            }
-            System.out.print("end: login\r\n");
-            return true;
-        } catch (IOException ie) {
-            return false;
-        }
-    }
-
-    // ダウンロード
-    public void ftpDownLoad() {
-        FileOutputStream outputstream;
-        boolean isRetrieve;
-
-        System.out.print("start: downLoad\r\n");
-        try {
-            // 実際のコードではディレクトリ構成は直書きしない
-            outputstream =
-                    new FileOutputStream("C:\\Users\\user\\Documents\\personList.csv");
-            isRetrieve =
-                    cli.retrieveFile("personList.csv", outputstream);
-            outputstream.close();
-            if (!isRetrieve) {
-                System.out.print("error: downLoad\r\n");
-            }
-            System.out.print("end: downLoad\r\n");
-        } catch (IOException ie) {
-            ie.printStackTrace();
-        }
-    }
-
-    //アップロード
-    private void ftpUpLoad() {
-        FileInputStream inputstream;
-        boolean isStore;
-
-        System.out.print("start: upLoad\r\n");
-        try {
-            // 実際のコードではディレクトリ構成は直書きしない
-            inputstream =
-                    new FileInputStream("C:\\Users\\user\\Documents\\personList.csv");
-            isStore =
-                    cli.storeFile("personList.csv",
-                            inputstream);
-            inputstream.close();
-            if (!isStore) {
-                System.out.print("error: upLoad\r\n");
-            }
-            System.out.print("end: upLoad\r\n");
-        } catch (IOException ie) {
-            ie.printStackTrace();
-        }
-    }
-
-    // 切断
-    public boolean disConnect() {
-
-        System.out.print("start: disConnect\r\n");
-        try {
-            if (cli != null && cli.isConnected()) {
-                cli.disconnect();
-            }
-            System.out.print("end: disConnect\r\n");
-            return true;
-        } catch (IOException ie) {
-            return false;
-        }
-    }
 
 }
 
