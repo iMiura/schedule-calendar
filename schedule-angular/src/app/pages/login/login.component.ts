@@ -43,8 +43,6 @@ export class LoginComponent implements OnInit {
   }
 
   login(response, that) {
-    // that.loginService.login(response.credential, returnCitySN["cip"], that.getBroswer()).then(data => {
-
     that.loginService.login(response.credential, '', that.getBroswer()).then(data => {
       // 認証失敗
       if (data.body.code === ResponseEnum.FAILED) {
