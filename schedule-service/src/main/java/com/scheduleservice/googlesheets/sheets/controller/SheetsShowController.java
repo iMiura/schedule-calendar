@@ -7,8 +7,6 @@ import com.scheduleservice.googlesheets.sheets.service.SheetsShowService;
 import com.scheduleservice.googlesheets.util.JsonResult;
 import io.swagger.annotations.Api;
 import java.util.Map;
-
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -82,18 +80,4 @@ public class SheetsShowController {
         log.debug("フィルタ対象担当者プルダウンの選択肢取得 完了（" + SessionUtil.getUserInfo().getUserName() + "）");
         return new ResponseEntity<>(JsonResult.success(result), HttpStatus.OK);
     }
-
-    /**
-     * Slackへ送信
-     */
-    @SneakyThrows
-    @GetMapping("/sendSlack")
-    public ResponseEntity<JsonResult> sendSlack(@RequestParam("slackText") String message) {
-        log.debug("Slackへ送信 開始");
-        Map result = sheetsShowService.sendSlack(message);
-        log.debug("Slackへ送信 完了");
-        return new ResponseEntity<>(JsonResult.success(result), HttpStatus.OK);
-    }
-
-
 }

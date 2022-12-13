@@ -17,8 +17,6 @@ import com.scheduleservice.googlesheets.repository.service.IWorkYmInfoService;
 import com.scheduleservice.googlesheets.security.session.SessionUtil;
 import com.scheduleservice.googlesheets.sheets.service.SheetsShowService;
 import com.scheduleservice.googlesheets.util.DateUtil;
-
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,20 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.slack.api.SlackConfig;
-import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.response.chat.ChatPostMessageResponse;
-import com.slack.api.model.Message;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import com.slack.api.Slack;
-
 
 /**
  * ユーザー情報 関連ビジネスロジックオブジェクト.
@@ -225,66 +214,4 @@ public class SheetsShowServiceImpl implements SheetsShowService {
 
         return result;
     }
-
-    @SneakyThrows
-    @Override
-    public Map sendSlack(String message) throws ServiceException, IOException {
-
-
-
-            log.debug("Slackへ送信 開始です");
-            try {
-
-                SlackConfig config = new SlackConfig();
-                config.setStatsEnabled(false);
-                Slack slack = Slack.getInstance(config);
-
-                // 環境変数を読み込みます
-                // トークンがボットトークンであれば `xoxb-`、ユーザートークンであれば `xoxp-` で始まっているはずです
-
-                // Googleのアカウントと同じような感じで、トークンのローテーションが必要？
-//                https://api.slack.com/authentication/rotation
-//                https://qiita.com/seratch/items/610c14208772d49ac9e4
-//                https://github.com/slackapi/java-slack-sdk/blob/v1.14.0/bolt-servlet/src/test/java/samples/OAuthSample.java
-
-//              もしかするとマニフェストファイルの設定で、↑の処理要らなくなる可能性もあるけど・・・24時間後とかに分かりそう。
-
-//                時々ボットが削除されてしまう・・・
-
-                // このトークンはハードコーディングから外す
-                String token = System.getenv("SLACK_TOKEN");
-                token = "xoxb-4065614398534-4402810386176-JPvLn093YmAus3l7qB5mMMcI";
-
-//                log.debug(token);
-
-                ChatPostMessageResponse response = slack.methods(token).chatPostMessage(req -> req
-                        .channel("#test") // チャンネル名を指定。
-                        .threadTs("1668668610.604149") // スレッドに書き込む場合はスレッドを指定。必須項目ではない。
-                        .text(message));
-                if (response.isOk()) {
-                    Message postedMessage = response.getMessage();
-                    log.debug(String.valueOf(postedMessage));
-                } else {
-                    String errorCode = response.getError(); // 例: "invalid_auth", "channel_not_found"
-                    log.debug(errorCode);
-                }
-
-                log.debug(response.getTs() + "←新規スレッド作成直後のthreadTsを、次回以降指定することでスレッドの特定ができる。");
-
-            } catch (SlackApiException requestFailure) {
-                // Slack API が 20x 以外の HTTP ステータスで応答した
-                requestFailure.printStackTrace();
-            } catch (IOException connectivityIssue) {
-                // 何らかの接続の問題が発生した
-                connectivityIssue.printStackTrace();
-            } finally {
-                log.debug("Slackへ送信 完了です");
-
-        }
-        return new HashMap();
-
-    }
-
-
 }
-

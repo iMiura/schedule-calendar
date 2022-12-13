@@ -19,8 +19,4 @@ export class HomeService {
   showUserList(): Promise<any> {
     return this.http.get(SERVER_API_URL + '/showUserList', {}).toPromise();
   }
-
-  sendSlack(slackText?): Promise<any> {
-    return this.http.get(SERVER_API_URL + '/sendSlack', {params: {slackText}}).toPromise();
-  }
 }

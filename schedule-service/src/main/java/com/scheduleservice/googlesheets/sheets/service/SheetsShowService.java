@@ -1,8 +1,6 @@
 package com.scheduleservice.googlesheets.sheets.service;
 
 import com.scheduleservice.googlesheets.exception.ServiceException;
-
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -29,10 +27,4 @@ public interface SheetsShowService {
      * フィルタ対象担当者プルダウンの選択肢取得
      */
     Map getUserList() throws ServiceException;
-
-    /**
-     * Slack送信
-     */
-    Map sendSlack(String slackText) throws ServiceException, IOException;
-
 }
