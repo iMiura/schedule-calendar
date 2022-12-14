@@ -9,6 +9,7 @@ import {ResponseEnum} from "../../response.enum";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {NzModalService} from 'ng-zorro-antd/modal';
 import {LocalStorageService} from "ngx-webstorage";
+import {MessageService} from "../message/message.service";
 
 @Component({
   selector: 'app-home',
@@ -18,7 +19,6 @@ import {LocalStorageService} from "ngx-webstorage";
 export class HomeComponent implements OnInit {
 
   radioValue = 0;
-  radioLabel = ['タスクリストベース進捗画面', '業務フローベース進捗画面', 'カレンダー展開画面']
   size: NzButtonSize = 'small';
   google_sheets_src: any;
 
@@ -27,12 +27,10 @@ export class HomeComponent implements OnInit {
   permission: any;
   deployedYm: any;
   startYm: any;
-  currentYm: any;
   ymShow: any;
   listYm: any;
   finalChangeDate: any;
   userIdentity: any;
-  teamName: any;
   userList: any;
   currentUserId: any;
   listUserId: any;
@@ -43,6 +41,7 @@ export class HomeComponent implements OnInit {
               private router: Router,
               private modal: NzModalService,
               private nzMessage: NzMessageService,
+              private messageService: MessageService,
               private homeService: HomeService,
               private localStorage: LocalStorageService,
               private sanitizer: DomSanitizer) {
@@ -53,18 +52,22 @@ export class HomeComponent implements OnInit {
     this.message = null;
     this.calendarYm = '';
     this.listYm = '';
-    this.userIdentity = this.localStorage.retrieve('userIdentity');
-    if (this.userIdentity) {
-      this.teamName = this.userIdentity.teamName;
-      if (this.userIdentity.userPermission == 0 || this.userIdentity.userPermission == 1) {
-        this.radioValue = 2;
-      }
-    }
     this.currentUserId = '';
     this.listUserId = '';
     this.userId = '';
+    if (this.localStorage.retrieve('listYm')) {
+      this.listYm = this.localStorage.retrieve('listYm');
+    }
+    if (this.localStorage.retrieve('listUserId')) {
+      this.listUserId = this.localStorage.retrieve('listUserId');
+    }
     this.getUserList();
-    this.getSheet();
+    this.messageService.get().subscribe(data => {
+      this.radioValue = data.code;
+      if (this.radioValue < 3) {
+        this.changeList();
+      }
+    });
   }
 
   changeList() {
@@ -127,6 +130,7 @@ export class HomeComponent implements OnInit {
         this.finalChangeDate = res.result.finalChangeDate;
       } else {
         this.listYm = this.calendarYm;
+        this.localStorage.store('listYm', this.listYm);
       }
     });
   }
@@ -174,6 +178,7 @@ export class HomeComponent implements OnInit {
   private setSheetFvid() {
     this.currentUserId = this.userId;
     this.listUserId = this.userId;
+    this.localStorage.store('listUserId', this.listUserId);
     if (this.userId) {
       this.isFilter = true;
     } else {

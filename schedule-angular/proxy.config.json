@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://prg-mng.u-car.co.jp/",
+    "target": "http://localhost:8080/",
     "secure": false,
     "pathRewrite": {
       "^/api": ""

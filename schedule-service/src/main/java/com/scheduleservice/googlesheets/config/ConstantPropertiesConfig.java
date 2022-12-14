@@ -27,4 +27,7 @@ public class ConstantPropertiesConfig {
 
   @Value("${jwt.remember.me.expires.at}")
   private String jwtRememberMeExpiresAt;
+
+  @Value("${SLACK_TOKEN}")
+  private String slackToken;
 }

@@ -1,0 +1,193 @@
+<h3>
+  <div style="margin-left: 20px;min-width: 1600px">
+    <div nz-row>
+      <div nz-col nzSpan="9">
+        <div nz-row>
+          <div nz-col nzSpan="3" style="text-align: right">メーカー</div>
+          <div nz-col nzSpan="4">
+            <nz-select
+              [nzDropdownMatchSelectWidth]=false
+              [nzSize]="size"
+              [(ngModel)]="makerCd"
+              (ngModelChange)="changeMaker()"
+              style="width: 120px;margin-left: 10px;"
+            >
+              <nz-option nzLabel="" nzValue="">
+              </nz-option>
+              <ng-container *ngFor="let item of makerList;">
+                <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                </nz-option>
+              </ng-container>
+            </nz-select>
+          </div>
+          <div nz-col nzSpan="6" style="text-align: right">対応時期</div>
+          <div nz-col nzSpan="10">
+            <nz-date-picker
+              nzMode="month"
+              nzInputReadOnly="true"
+              [nzSize]="size"
+              [nzFormat]="monthFormat"
+              [nzPlaceHolder]="' '"
+              [(ngModel)]="supportPeriod"
+              style="width: 120px;margin-left: 10px;"
+            ></nz-date-picker>
+          </div>
+        </div>
+        <div nz-row>
+          <div nz-col nzSpan="3" style="text-align: right">車種</div>
+          <div nz-col nzSpan="4">
+            <nz-select
+              [nzDropdownMatchSelectWidth]=false
+              [nzSize]="size"
+              [(ngModel)]="carModelCd"
+              (ngModelChange)="changeCarModel()"
+              [disabled]="makerCd==null || makerCd==''"
+              style="width: 120px;margin-left: 10px;"
+            >
+              <nz-option nzLabel="" nzValue="">
+              </nz-option>
+              <ng-container *ngFor="let item of carModelList;">
+                <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                </nz-option>
+              </ng-container>
+            </nz-select>
+          </div>
+          <div nz-col nzSpan="6"style="text-align: right">販売区分</div>
+          <div nz-col nzSpan="10">
+            <nz-select
+              [nzDropdownMatchSelectWidth]=false
+              [nzSize]="size"
+              [(ngModel)]="salesCategoryL"
+              (ngModelChange)="changeSalesCategory()"
+              style="width: 120px;margin-left: 10px;"
+            >
+              <nz-option nzLabel="" nzValue="">
+              </nz-option>
+              <ng-container *ngFor="let item of salesCategoryLList;">
+                <nz-option nzLabel="{{item.label}}" nzValue="{{item.label}}">
+                </nz-option>
+              </ng-container>
+            </nz-select>
+            <nz-select
+              [nzDropdownMatchSelectWidth]=false
+              [nzSize]="size"
+              [(ngModel)]="salesCategoryR"
+              [disabled]="salesCategoryL==null || salesCategoryL==''"
+              style="width: 120px;margin-left: 10px;"
+            >
+              <nz-option nzLabel="" nzValue="">
+              </nz-option>
+              <ng-container *ngFor="let item of salesCategoryRList;">
+                <nz-option nzLabel="{{item.label}}" nzValue="{{item.label}}">
+                </nz-option>
+              </ng-container>
+            </nz-select>
+          </div>
+        </div>
+        <div nz-row>
+          <div nz-col nzSpan="3" style="text-align: right">車種系統</div>
+          <div nz-col nzSpan="4">
+            <nz-select
+              [nzDropdownMatchSelectWidth]=false
+              [nzSize]="size"
+              [(ngModel)]="carModelGroupCd"
+              [disabled]="carModelCd==null || carModelCd==''"
+              style="width: 120px;margin-left: 10px;"
+            >
+              <nz-option nzLabel="" nzValue="">
+              </nz-option>
+              <ng-container *ngFor="let item of carModelGroupList;">
+                <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                </nz-option>
+              </ng-container>
+            </nz-select>
+          </div>
+          <div nz-col nzSpan="6" style="text-align: right">新車入力担当者</div>
+          <div nz-col nzSpan="10">
+            <nz-select
+              [nzDropdownMatchSelectWidth]=false
+              [nzSize]="size"
+              [(ngModel)]="picId"
+              style="width: 120px;margin-left: 10px;"
+            >
+              <nz-option nzLabel="" nzValue="">
+              </nz-option>
+              <ng-container *ngFor="let item of userList;">
+                <nz-option nzLabel="{{item.label}}" nzValue="{{item.label}}">
+                </nz-option>
+              </ng-container>
+            </nz-select>
+          </div>
+        </div>
+        <div nz-row>
+          <div nz-col nzSpan="7"></div>
+          <div nz-col nzSpan="6" style="text-align: right">リリース区分</div>
+          <div nz-col nzSpan="10">
+            <nz-select
+              [nzDropdownMatchSelectWidth]=false
+              [nzSize]="size"
+              [(ngModel)]="releaseCategory"
+              style="width: 120px;margin-left: 10px;"
+            >
+              <nz-option nzLabel="" nzValue="">
+              </nz-option>
+              <ng-container *ngFor="let item of releaseCategoryList;">
+                <nz-option nzLabel="{{item.label}}" nzValue="{{item.label}}">
+                </nz-option>
+              </ng-container>
+            </nz-select>
+          </div>
+        </div>
+      </div>
+      <div nz-col nzSpan="3">
+        <div nz-row>
+          <div nz-col nzSpan="24" style="font-size: 1.17em">
+            <label nz-checkbox [(ngModel)]="checked">未チェック分を表示</label>
+          </div>
+        </div>
+        <div nz-row style="margin-top: 45px;">
+          <div nz-col nzSpan="24">
+            <button nz-button nzType="default" class="release-button" (click)="search()">検　索</button>
+            <button nz-button nzType="default" class="release-button" (click)="clear()">クリア</button>
+          </div>
+        </div>
+      </div>
+      <div nz-col nzSpan="12">
+        <div nz-row nzAlign="top">
+          <div nz-col nzSpan="8">
+            <nz-table
+              #basicTable
+              [nzBordered]="true"
+              [nzVirtualItemSize]="54"
+              [nzData]="masterScheduleList"
+              [nzFrontPagination]="false"
+              [nzShowPagination]="false"
+            >
+              <tbody>
+              <tr *ngFor="let data of basicTable.data;index as i" style="height: 26px">
+                <td *ngIf="i==0" style="background-color: #f0f0f0">{{data.title}}</td>
+                <td *ngIf="i==0" style="background-color: #f0f0f0;text-align: right">{{data.dateStart}}</td>
+                <td *ngIf="i==0" style="background-color: #f0f0f0;text-align: right">{{data.dateEnd}}</td>
+                <td *ngIf="i>0">{{data.title}}</td>
+                <td *ngIf="i>0" style="text-align: right">{{data.dateStart}}</td>
+                <td *ngIf="i>0" style="text-align: right">{{data.dateEnd}}</td>
+              </tr>
+              </tbody>
+            </nz-table>
+          </div>
+          <div nz-col nzSpan="8" style="text-align: center">
+            <a nz-button nzType="default" class="release-button" routerLink="/release-info" target="_blank">リリース内容入力</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</h3>
+<div class="tab-wrap">
+  <div class="tab-content">
+    <div class="iframe-container">
+      <iframe allowTransparency="true" [src]="google_sheets_src" *ngIf="message == null && google_sheets_src != ''" class="iframe-no-filterview"></iframe>
+      <h3 *ngIf="message" style="color: red">{{message}}</h3>
+    </div>
+  </div>
+</div>

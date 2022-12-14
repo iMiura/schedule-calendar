@@ -30,6 +30,15 @@ import {LocalStorageService, NgxWebstorageModule, SessionStorageService} from "n
 import {ExceptionHandlerInterceptor} from "./core/interceptor/exception.handler.interceptor";
 import {NzNotificationService} from 'ng-zorro-antd/notification';
 import {CredentialComponent} from "./pages/credential/credential.component";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {NzTableModule} from "ng-zorro-antd/table";
+import {ReleaseComponent} from "./pages/release/release.component";
+import {ReleaseInfoComponent} from "./pages/release-info/release-info.component";
+import {NzDatePickerModule} from "ng-zorro-antd/date-picker";
+import {registerLocaleData} from "@angular/common";
+import ja from '@angular/common/locales/ja';
+registerLocaleData(ja);
+import {ja_JP, NZ_I18N} from "ng-zorro-antd/i18n";
 
 @NgModule({
   declarations: [
@@ -38,6 +47,8 @@ import {CredentialComponent} from "./pages/credential/credential.component";
     NavbarComponent,
     OperateComponent,
     CredentialComponent,
+    ReleaseComponent,
+    ReleaseInfoComponent,
   ],
   imports: [
     BrowserModule,
@@ -61,6 +72,10 @@ import {CredentialComponent} from "./pages/credential/credential.component";
     NzModalModule,
     NzSpaceModule,
     NgxWebstorageModule.forRoot(),
+    FormsModule,
+    NzTableModule,
+    NzDatePickerModule,
+    ReactiveFormsModule,
   ],
   providers: [
     {
@@ -77,7 +92,10 @@ import {CredentialComponent} from "./pages/credential/credential.component";
     },
     NzModalService,
     NzMessageService,
-    NzNotificationService
+    NzNotificationService,
+    {
+      provide: NZ_I18N, useValue: ja_JP
+    }
   ],
   bootstrap: [AppComponent]
 })

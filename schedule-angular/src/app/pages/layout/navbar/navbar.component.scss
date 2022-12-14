@@ -30,7 +30,7 @@
   display: inline-block;
   color: #000;
   font-weight: 600;
-  font-size: 30px;
+  font-size: 18px;
   font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
   vertical-align: middle;
 }
@@ -43,7 +43,7 @@ nz-header {
 .app-header {
   position: relative;
   display: flex;
-  height: 64px;
+  height: 108px;
   padding: 0;
   background: #FFF1CE;
 }
@@ -57,3 +57,72 @@ nz-header {
   border-radius: 10px !important;
 }
 
+.button-large {
+  margin-right: 20px!important;
+  color: #fff;
+  background-color: #139487;
+  border-color: #139487;
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, .6);
+}
+
+.button-large::before {
+  width: 0px !important;
+}
+
+.button-large:hover{
+  margin-right: 20px;
+  color: #fff;
+  background-color: #D29D2B !important;
+  border-color: #D29D2B !important;
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 3px #000;
+}
+
+.button-large-green {
+  margin-right: 20px!important;
+  color: #fff;
+  background-color: #6BCB77;
+  border-color: #6BCB77;
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, .6);
+}
+
+.button-large-green::before {
+  width: 0px !important;
+}
+
+.button-large-green:hover{
+  margin-right: 20px;
+  color: #fff;
+  background-color: #D29D2B !important;
+  border-color: #D29D2B !important;
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 3px #000;
+}
+
+.ant-radio-button-wrapper-checked {
+  margin-right: 20px;
+  background-color: #D29D2B !important;
+  border-color: #D29D2B !important;
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 3px inset rgba(0, 0, 0, .6);
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+  background-color: #FFF1CE !important;
+}
+
+hr {
+  color: #D29D2B;
+  background-color: #D29D2B;
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, .6);
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: -14px;
+}
+
+h3 {
+  margin-left: 20px;
+  margin-bottom: -1px;
+}

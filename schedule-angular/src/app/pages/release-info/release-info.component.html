@@ -1,0 +1,310 @@
+<nz-modal
+  [(nzVisible)]="isVisible"
+  [nzTitle]=null
+  [nzClosable]=null
+  [nzFooter] = null
+  [nzMaskClosable] = false
+  (nzOnCancel)="handleCancel()"
+  nzWidth='1200px'
+>
+  <div *nzModalContent class="nz-modal">
+    <h3>
+      <label style="font-size: 1.67em;">リリース内容入力画面</label>
+      <hr />
+    </h3>
+    <h3>
+      <span style="color: red">「*」は必須項目です。</span>
+      <form nz-form [formGroup]="validateForm">
+        <nz-form-item [nzGutter]="[10, 10]">
+          <nz-form-label [nzSpan]="3" [nzNoColon]="true"><span style="font-size: 1.17em;">リリースNo.</span></nz-form-label>
+          <nz-form-label [nzSpan]="18" [nzNoColon]="true" style="text-align: left;"><span style="font-size: 1.17em;">{{releaseInfoId}}</span></nz-form-label>
+        </nz-form-item>
+        <div nz-row>
+          <div nz-col nzSpan="12">
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">リリース区分</span></nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <nz-select
+                  [nzDropdownMatchSelectWidth]=false
+                  [nzSize]="size"
+                  formControlName="releaseCategoryId"
+                  (ngModelChange)="changeReleaseCategory()"
+                  style="width: 120px;"
+                >
+                  <nz-option nzLabel="" nzValue="">
+                  </nz-option>
+                  <ng-container *ngFor="let item of releaseCategoryList;">
+                    <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                    </nz-option>
+                  </ng-container>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">次回確認予定日</span></nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <nz-date-picker
+                  [nzSize]="size"
+                  [nzPlaceHolder]="' '"
+                  [nzFormat]="dateFormat"
+                  formControlName="nextConfirmDate"
+                  [nzDisabled]="validateForm.value.releaseCategoryId!=1"
+                  nzInputReadOnly="true"
+                  style="width: 120px;"
+                ></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true" nzRequired><span style="font-size: 1.17em;">発表日</span></nz-form-label>
+              <nz-form-control [nzSpan]="18" nzErrorTip="発表日が未記載です。">
+                <nz-date-picker
+                  [nzSize]="size"
+                  [nzPlaceHolder]="' '"
+                  [nzFormat]="dateFormat"
+                  formControlName="announcementDate"
+                  nzInputReadOnly="true"
+                  style="width: 120px;"
+                ></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true" nzRequired><span style="font-size: 1.17em;">発売日</span></nz-form-label>
+              <nz-form-control [nzSpan]="18" nzErrorTip="発売日が未記載です。">
+                <nz-date-picker
+                  [nzSize]="size"
+                  [nzPlaceHolder]="' '"
+                  [nzFormat]="dateFormat"
+                  formControlName="launchDate"
+                  nzInputReadOnly="true"
+                  style="width: 120px;"
+                ></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">リリースURL</span></nz-form-label>
+              <nz-form-control [nzSpan]="18">
+                <input
+                  nz-input
+                  placeholder=""
+                  [nzSize]="size"
+                  formControlName="releaseUrl"
+                  style="width: 250px;"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <div nz-row style="margin-left: -3px">
+              <div nz-col nzSpan="12">
+                <nz-form-item [nzGutter]="[10, 10]">
+                  <nz-form-label [nzSpan]="12" [nzNoColon]="true" nzRequired><span style="font-size: 1.17em;">メーカー</span></nz-form-label>
+                  <nz-form-control [nzSpan]="12" nzErrorTip="メーカーが未記載です。">
+                    <nz-select
+                      [nzDropdownMatchSelectWidth]=false
+                      [nzSize]="size"
+                      formControlName="makerCd"
+                      (ngModelChange)="changeMaker()"
+                      style="width: 120px;"
+                    >
+                      <nz-option nzLabel="" nzValue="">
+                      </nz-option>
+                      <ng-container *ngFor="let item of makerList;">
+                        <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                        </nz-option>
+                      </ng-container>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item [nzGutter]="[10, 10]">
+                  <nz-form-label [nzSpan]="12" [nzNoColon]="true" nzRequired><span style="font-size: 1.17em;">車種</span></nz-form-label>
+                  <nz-form-control [nzSpan]="12" nzErrorTip="車種が未記載です。">
+                    <nz-select
+                      [nzDropdownMatchSelectWidth]=false
+                      [nzSize]="size"
+                      formControlName="carModelCd"
+                      (ngModelChange)="changeCarModel()"
+                      [nzDisabled]="!validateForm.value.makerCd"
+                      style="width: 120px;"
+                    >
+                      <nz-option nzLabel="" nzValue="">
+                      </nz-option>
+                      <ng-container *ngFor="let item of carModelList;">
+                        <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                        </nz-option>
+                      </ng-container>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item [nzGutter]="[10, 10]">
+                  <nz-form-label [nzSpan]="12" [nzNoColon]="true" nzRequired><span style="font-size: 1.17em;">車種系統</span></nz-form-label>
+                  <nz-form-control [nzSpan]="12" nzErrorTip="車種系統が未記載です。">
+                    <nz-select
+                      [nzDropdownMatchSelectWidth]=false
+                      [nzSize]="size"
+                      formControlName="carModelGroupCd"
+                      [nzDisabled]="!validateForm.value.carModelCd"
+                      style="width: 120px;"
+                    >
+                      <nz-option nzLabel="" nzValue="">
+                      </nz-option>
+                      <ng-container *ngFor="let item of carModelGroupList;">
+                        <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                        </nz-option>
+                      </ng-container>
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div nz-col nzSpan="12">
+                <nz-form-item [nzGutter]="[10, 10]">
+                  <nz-form-label [nzSpan]="12" [nzNoColon]="true"><span style="font-size: 1.17em;">仮入力</span></nz-form-label>
+                  <nz-form-control [nzSpan]="12">
+                    <label nz-checkbox formControlName="tempChecked"></label>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item [nzGutter]="[10, 10]">
+                  <nz-form-label [nzSpan]="12" [nzNoColon]="true"><span style="font-size: 1.17em;">仮車種</span></nz-form-label>
+                  <nz-form-control [nzSpan]="12">
+                    <input
+                      nz-input
+                      placeholder=""
+                      [nzSize]="size"
+                      formControlName="tempCarName"
+                      style="width: 120px;"
+                    />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item [nzGutter]="[10, 10]">
+                  <nz-form-label [nzSpan]="12" [nzNoColon]="true"><span style="font-size: 1.17em;">仮車種系統名</span></nz-form-label>
+                  <nz-form-control [nzSpan]="12">
+                    <input
+                      nz-input
+                      placeholder=""
+                      [nzSize]="size"
+                      formControlName="tempCarGroupName"
+                      style="width: 120px;"
+                    />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+          <div nz-col nzSpan="12">
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">販売区分</span></nz-form-label>
+              <nz-form-control [nzSpan]="18" [nzErrorTip]="salesCategoryLErrorTpl" [nzValidateStatus]="(validateForm.get('salesCategoryIdL').invalid || validateForm.get('salesCategoryIdR').invalid)?'error':'success'">
+                <nz-select
+                  [nzDropdownMatchSelectWidth]=false
+                  [nzSize]="size"
+                  formControlName="salesCategoryIdL"
+                  (ngModelChange)="changeSalesCategory()"
+                  style="width: 120px;margin-right: 10px;"
+                >
+                  <nz-option nzLabel="" nzValue="">
+                  </nz-option>
+                  <ng-container *ngFor="let item of salesCategoryLList;">
+                    <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                    </nz-option>
+                  </ng-container>
+                </nz-select>
+                <nz-select
+                  [nzDropdownMatchSelectWidth]=false
+                  [nzSize]="size"
+                  formControlName="salesCategoryIdR"
+                  [nzDisabled]="!validateForm.value.salesCategoryIdL"
+                  style="width: 120px;"
+                >
+                  <nz-option nzLabel="" nzValue="">
+                  </nz-option>
+                  <ng-container *ngFor="let item of salesCategoryRList;">
+                    <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                    </nz-option>
+                  </ng-container>
+                </nz-select>
+                <ng-template #salesCategoryLErrorTpl let-control>
+                  <ng-container *ngIf="validateForm.get('salesCategoryIdL').invalid || validateForm.get('salesCategoryIdR').invalid">販売区分が同一です。</ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">販売区分の備考</span></nz-form-label>
+              <nz-form-control [nzSpan]="18" [nzErrorTip]="salesCategoryLErrorTpl">
+                <input
+                  nz-input
+                  placeholder=""
+                  [nzSize]="size"
+                  formControlName="salesCategoryNote"
+                  maxlength="255"
+                  style="width: 250px;"
+                />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">対応時期</span></nz-form-label>
+              <nz-form-control [nzSpan]="18" [nzErrorTip]="salesCategoryLErrorTpl">
+                <nz-select
+                  [nzDropdownMatchSelectWidth]=false
+                  [nzSize]="size"
+                  formControlName="supportPeriod"
+                  style="width: 120px;"
+                >
+                  <nz-option nzLabel="" nzValue="">
+                  </nz-option>
+                  <ng-container *ngFor="let item of supportPeriodList;">
+                    <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                    </nz-option>
+                  </ng-container>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">新車入力担当者</span></nz-form-label>
+              <nz-form-control [nzSpan]="18" [nzErrorTip]="salesCategoryLErrorTpl">
+                <nz-select
+                  [nzDropdownMatchSelectWidth]=false
+                  [nzSize]="size"
+                  formControlName="picId"
+                  style="width: 120px;"
+                >
+                  <nz-option nzLabel="" nzValue="">
+                  </nz-option>
+                  <ng-container *ngFor="let item of userList;">
+                    <nz-option nzLabel="{{item.label}}" nzValue="{{item.value}}">
+                    </nz-option>
+                  </ng-container>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item [nzGutter]="[10, 10]">
+              <nz-form-label [nzSpan]="6" [nzNoColon]="true"><span style="font-size: 1.17em;">備考</span></nz-form-label>
+              <nz-form-control [nzSpan]="18" [nzErrorTip]="salesCategoryLErrorTpl">
+                <textarea
+                  rows="6"
+                  nz-input
+                  formControlName="note"
+                  style="width: 400px;height: 130px;margin-top: 4px;"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <div nz-row>
+          <div nz-col nzSpan="12">
+            <ng-container *ngIf="releaseInfoId">
+              <button nz-button nzType="default" class="del-button" [disabled]="deleteFlg=='1'" (click)="delRelease()">削　除</button>
+            </ng-container>
+          </div>
+          <div nz-col nzSpan="12">
+            <div nz-col nzSpan="24" style="text-align: right">
+              <ng-container *ngIf="releaseInfoId">
+                <button nz-button nzType="default" class="save-button" [disabled]="deleteFlg=='1'" (click)="submitForm()">更　新</button>
+              </ng-container>
+              <ng-container *ngIf="!releaseInfoId">
+                <button nz-button nzType="default" class="save-button" (click)="submitForm()">保　存</button>
+              </ng-container>
+              <button nz-button nzType="default" class="close-button" (click)="handleCancel()">閉じる</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </h3>
+  </div>
+</nz-modal>

@@ -4,6 +4,8 @@ import {LoginComponent} from './pages/login/login.component';
 import {OperateComponent} from './pages/operate/operate.component';
 import {NavbarComponent} from './pages/layout/navbar/navbar.component';
 import {CredentialComponent} from "./pages/credential/credential.component";
+import {ReleaseComponent} from "./pages/release/release.component";
+import {ReleaseInfoComponent} from "./pages/release-info/release-info.component";
 
 const routes: Routes = [
   {
@@ -24,6 +26,10 @@ const routes: Routes = [
         path: '',
         loadChildren: () => import('./pages/home/home.module').then(m => m.HomeModule),
       },
+      {
+        path: 'release',
+        component: ReleaseComponent
+      },
     ]
   },
   {
@@ -33,6 +39,10 @@ const routes: Routes = [
   {
     path: 'credential',
     component: CredentialComponent
+  },
+  {
+    path: 'release-info',
+    component: ReleaseInfoComponent
   },
 ];
 
