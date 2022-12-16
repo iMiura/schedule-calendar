@@ -404,6 +404,14 @@ public class ReleaseServiceImpl implements ReleaseService {
         releaseInfo.setUpdateDate(DateUtil.format(localDateTime, "MM/dd"));
         // トリガー起動指示フラグ
         releaseInfo.setTriggerFlg("1");
+        // 車種=NULLの場合、仮車種を書込み
+        if (!StringUtils.hasLength(releaseInfo.getCarModelName())) {
+            releaseInfo.setCarModelName(releaseInfo.getTempCarName());
+        }
+        // 車種系統=NULLの場合、仮車種系統を書込み
+        if (!StringUtils.hasLength(releaseInfo.getCarModelGroupName())) {
+            releaseInfo.setCarModelGroupName(releaseInfo.getTempCarGroupName());
+        }
         List<String> ranges = new ArrayList();
         List<String> values = new ArrayList();
         try {
@@ -538,7 +546,7 @@ public class ReleaseServiceImpl implements ReleaseService {
         }
         // リリースURL
         releaseInfoEntity.setReleaseUrl(releaseInfo.getReleaseUrl());
-        // ーカーCD
+        // メーカーCD
         releaseInfoEntity.setMakerCd(Long.parseLong(releaseInfo.getMakerCd()));
         // 車種CD
         if (StringUtils.hasLength(releaseInfo.getCarModelCd())) {

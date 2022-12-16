@@ -73,7 +73,7 @@ export const RELEASE_CATEGORY = [
   },
   {
     value: 2,
-    label: 'リリース無し'
+    label: 'リリース無し審議'
   },
   {
     value: 3,
