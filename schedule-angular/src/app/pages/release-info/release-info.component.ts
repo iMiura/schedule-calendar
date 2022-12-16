@@ -110,10 +110,18 @@ export class ReleaseInfoComponent implements OnInit {
     this.releaseInfoService.findReleaseInfo(this.releaseInfoId).then(res => {
       this.makerList = res.result.makerList;
       this.supportPeriodList = res.result.supportPeriodList;
+      if (this.supportPeriodList) {
+        this.validateForm.value.supportPeriod = this.supportPeriodList[0]['value'];
+      }
       this.userList = res.result.userList;
       this.finalChangeDate = res.result.finalChangeDate;
       this.formPatchValue(res.result.releaseInfo);
       this.disabledItem((res.result.releaseInfo))
+      if (this.supportPeriodList) {
+        this.validateForm.patchValue({
+          supportPeriod: this.supportPeriodList[0]['value']
+        });
+      }
     });
   }
 

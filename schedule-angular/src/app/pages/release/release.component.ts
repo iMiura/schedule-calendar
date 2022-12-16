@@ -45,6 +45,7 @@ export class ReleaseComponent implements OnInit {
   checked = false;
 
   google_sheets_src: any;
+  isFilter: any;
 
   message: any;
 
@@ -93,6 +94,9 @@ export class ReleaseComponent implements OnInit {
     this.makerCd = null;
     this.carModelCd = null;
     this.carModelGroupCd = null;
+    this.makerName = null;
+    this.carModelName = null;
+    this.carModelGroupName = null;
     this.supportPeriod = null;
     this.salesCategoryL = null;
     this.salesCategoryR = null;
@@ -137,6 +141,11 @@ export class ReleaseComponent implements OnInit {
       this.picId,
       this.checked
     ).then(res => {
+      if (res.result.listUrl.indexOf('fvid') > -1) {
+        this.isFilter = true;
+      } else {
+        this.isFilter = false;
+      }
       this.google_sheets_src = this.sanitizer.bypassSecurityTrustResourceUrl(res.result.listUrl);
     });
   }

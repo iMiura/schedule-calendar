@@ -184,7 +184,9 @@
 <div class="tab-wrap">
   <div class="tab-content">
     <div class="iframe-container">
-      <iframe allowTransparency="true" [src]="google_sheets_src" *ngIf="message == null && google_sheets_src != ''" class="iframe-no-filterview"></iframe>
+<!--      <iframe allowTransparency="true" [src]="google_sheets_src" *ngIf="message == null && google_sheets_src != ''" class="iframe-no-filterview"></iframe>-->
+      <iframe allowTransparency="true" [src]="google_sheets_src" *ngIf="message == null && google_sheets_src != '' && isFilter" class="iframe-with-filterview"></iframe>
+      <iframe allowTransparency="true" [src]="google_sheets_src" *ngIf="message == null && google_sheets_src != '' && !isFilter" class="iframe-no-filterview"></iframe>
       <h3 *ngIf="message" style="color: red">{{message}}</h3>
     </div>
   </div>

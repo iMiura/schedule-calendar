@@ -699,8 +699,12 @@ public class ReleaseServiceImpl implements ReleaseService {
         if (StringUtils.hasLength(releaseInfo.getReleaseCategory())) {
             param.put("release_category", releaseInfo.getReleaseCategory());
         }
+
+
         if (StringUtils.hasLength(checked)) {
-            param.put("check", checked.toUpperCase());
+            if (!"false".equals(checked) ) {
+                param.put("check", checked.toUpperCase());
+            }
         }
         if (param.keySet().size() == 0) {
             return null;
@@ -730,7 +734,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                     (Map<String, String>)(op.getResponse().get("result"));
                 if (folderSet.size() > 0) {
                     for (String id: folderSet.keySet()) {
-                        return folderSet.get(id);
+                        return String.valueOf(folderSet.get(id));
                     }
                 }
             }
