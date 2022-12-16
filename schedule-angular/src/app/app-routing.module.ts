@@ -26,10 +26,6 @@ const routes: Routes = [
         path: '',
         loadChildren: () => import('./pages/home/home.module').then(m => m.HomeModule),
       },
-      {
-        path: 'release',
-        component: ReleaseComponent
-      },
     ]
   },
   {
@@ -41,6 +37,16 @@ const routes: Routes = [
     component: CredentialComponent
   },
   {
+    path: 'release',
+    component: NavbarComponent,
+    children: [
+      {
+        path: '',
+        component: ReleaseComponent
+      },
+    ]
+  },
+  {
     path: 'release-info',
     component: ReleaseInfoComponent
   },
@@ -48,9 +54,9 @@ const routes: Routes = [
 
 @NgModule({
   // ローカル実行時、コメントアウトを外す
-  // imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes)],
   // War作成時、コメントアウトを外す
-  imports: [RouterModule.forRoot(routes, {useHash: true})],
+  // imports: [RouterModule.forRoot(routes, {useHash: true})],
   exports: [RouterModule]
 })
 export class AppRoutingModule {

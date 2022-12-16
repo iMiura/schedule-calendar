@@ -53,6 +53,9 @@ export class AuthJwtService {
     return new Observable(observer => {
       this.localStorage.clear('authenticationToken');
       this.sessionStorage.clear('authenticationToken');
+      this.localStorage.clear('userIdentity');
+      this.localStorage.clear('listYm');
+      this.localStorage.clear('listUserId')
       observer.complete();
     });
   }

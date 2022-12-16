@@ -44,24 +44,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.teamName = this.userIdentity.teamName;
       this.permission = that.userIdentity.userPermission;
       this.radioValue = 0;
-      if (this.permission == 0 || this.permission == 1) {
-        this.radioValue = 2;
-        setTimeout(function() {
-          that.messageService.send(new Msg(that.radioValue));
-        }, 100);
+      if (this.teamId == 1) {
+        if (this.permission == 0 || this.permission == 1) {
+          this.radioValue = 2;
+          setTimeout(function() {
+            that.messageService.send(new Msg(that.radioValue));
+          }, 100);
+        }
+      }
+      if (this.teamId == 2) {
+        this.radioValue = 5;
       }
     }
     this.messageService.get().subscribe(data => {
       this.radioValue = data.code;
     });
-    const button = document.getElementById('signout_button');
-    button.onclick = () => {
-      google.accounts.id.disableAutoSelect();
-      that.loginService.logout().then(() => {
-        this.router.navigate(['/login']).then(() => {
-        });
-      });
-    }
   }
 
   ngOnDestroy(): void {
@@ -71,14 +68,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   changeList() {
     const that = this;
     if (this.radioValue == 3) {
-      this.teamName = 'チーム共通'
       this.router.navigate(['/home/newCar'], {
         skipLocationChange: false,
       });
     }
     if (this.radioValue == 5) {
-      this.teamName = 'チーム共通'
-      this.router.navigate(['/home/release'], {
+      this.router.navigate(['/release'], {
         skipLocationChange: false,
       });
     }
@@ -91,5 +86,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
         that.messageService.send(new Msg(that.radioValue));
       }, 100);
     }
+  }
+
+  logout() {
+    google.accounts.id.disableAutoSelect();
+    this.loginService.logout().then(() => {
+      this.router.navigate(['/login']).then(() => {
+      });
+    });
   }
 }

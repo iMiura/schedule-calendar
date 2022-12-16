@@ -89,10 +89,6 @@ export class ReleaseComponent implements OnInit {
     }
   }
 
-  changeSalesCategory() {
-    this.salesCategoryR = null;
-  }
-
   clear() {
     this.makerCd = null;
     this.carModelCd = null;

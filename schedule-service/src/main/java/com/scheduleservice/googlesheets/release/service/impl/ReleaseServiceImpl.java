@@ -1,14 +1,18 @@
 package com.scheduleservice.googlesheets.release.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.DataStoreCredentialRefreshListener;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.script.Script;
+import com.google.api.services.script.ScriptScopes;
+import com.google.api.services.script.model.ExecutionRequest;
+import com.google.api.services.script.model.Operation;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.scheduleservice.googlesheets.config.ConstantPropertiesConfig;
@@ -25,6 +29,7 @@ import com.scheduleservice.googlesheets.repository.entity.MakerMasterEntity;
 import com.scheduleservice.googlesheets.repository.entity.MasterScheduleEntity;
 import com.scheduleservice.googlesheets.repository.entity.ReleaseInfoEntity;
 import com.scheduleservice.googlesheets.repository.entity.RowInfoEntity;
+import com.scheduleservice.googlesheets.repository.entity.SlackDocumentMstEntity;
 import com.scheduleservice.googlesheets.repository.entity.UserInfoEntity;
 import com.scheduleservice.googlesheets.repository.entity.WritingSetInfoEntity;
 import com.scheduleservice.googlesheets.repository.service.ICarModelGroupMasterService;
@@ -34,6 +39,7 @@ import com.scheduleservice.googlesheets.repository.service.IMakerMasterService;
 import com.scheduleservice.googlesheets.repository.service.IMasterScheduleService;
 import com.scheduleservice.googlesheets.repository.service.IReleaseInfoService;
 import com.scheduleservice.googlesheets.repository.service.IRowInfoService;
+import com.scheduleservice.googlesheets.repository.service.ISlackDocumentMstService;
 import com.scheduleservice.googlesheets.repository.service.ISystemPropertyService;
 import com.scheduleservice.googlesheets.repository.service.IUserInfoService;
 import com.scheduleservice.googlesheets.repository.service.IWritingSetInfoService;
@@ -46,17 +52,14 @@ import com.slack.api.SlackConfig;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import com.slack.api.model.Message;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLConnection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +96,8 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Autowired
     private IWritingSetInfoService iWritingSetInfoService;
     @Autowired
+    private ISlackDocumentMstService iSlackDocumentMstService;
+    @Autowired
     private CustomMessageResource messageSource;
     @Autowired
     private ISystemPropertyService iSystemPropertyService;
@@ -102,6 +107,8 @@ public class ReleaseServiceImpl implements ReleaseService {
     private GoogleAuthorizationCodeFlow flow;
     /** Sheet service. */
     private Sheets sheetsService;
+    /** Script service. */
+    Script service;
 
     @Override
     public Map initReleaseSearch() throws ServiceException {
@@ -165,8 +172,8 @@ public class ReleaseServiceImpl implements ReleaseService {
         masterScheduleList.add(scheduleMap);
         resultMap.put("masterScheduleList", masterScheduleList);
 
-        // 担当者情報取得
-        List<UserInfoEntity> list = iUserInfoService.getUserList();
+        // 新車入力担当者情報取得
+        List<UserInfoEntity> list = iUserInfoService.getPicList();
         List<Map> userList = new ArrayList<>();
         for (UserInfoEntity userInfoEntity : list) {
             Map userMap = new HashMap();
@@ -221,82 +228,41 @@ public class ReleaseServiceImpl implements ReleaseService {
     }
 
     @Override
-    public Map getReleaseFile(ReleaseInfo releaseInfo, String checked) throws ServiceException {
+    public Map getReleaseFile(ReleaseInfo releaseInfo, String checked) {
         // スプレッドシートファイル保存先URL
         String listUrl = "";
         String message = null;
-        try {
-            // スプレッドAPI情報取得
-            GoogleSheetsInfoMstEntity googleSheetsInfoMstEntity = iGoogleSheetsInfoMstService.getGoogleSheetsInfo(CommonConstant.GOOGLE_SHEETS_DIV_1, CommonConstant.GOOGLE_SHEETS_API_DIV_2);
-            if (googleSheetsInfoMstEntity != null) {
-                String apiUrl = googleSheetsInfoMstEntity.getGoogleSheetsFileUrl();
-                apiUrl = apiUrl + googleSheetsInfoMstEntity.getGoogleSheetsFileId();
-                String param = "";
-                if (StringUtils.hasLength(releaseInfo.getSupportPeriod())) {
-                    param += "support_period=" + releaseInfo.getSupportPeriod() + "&";
-                }
-                if (StringUtils.hasLength(releaseInfo.getSalesCategoryL())) {
-                    param += "sales_category_l=" + releaseInfo.getSalesCategoryL() + "&";
-                }
-                if (StringUtils.hasLength(releaseInfo.getSalesCategoryR())) {
-                    param += "sales_category_r=" + releaseInfo.getSalesCategoryR() + "&";
-                }
-                if (StringUtils.hasLength(releaseInfo.getPicId())) {
-                    param += "pic_user=" + releaseInfo.getPicId() + "&";
-                }
-                if (StringUtils.hasLength(releaseInfo.getMakerCd())) {
-                    param += "maker_name=" + releaseInfo.getMakerCd() + "&";
-                }
-                if (StringUtils.hasLength(releaseInfo.getCarModelCd())) {
-                    param += "car_model_name=" + releaseInfo.getCarModelCd() + "&";
-                }
-                if (StringUtils.hasLength(releaseInfo.getCarModelGroupCd())) {
-                    param += "car_model_group_name=" + releaseInfo.getCarModelGroupCd() + "&";
-                }
-                if (StringUtils.hasLength(releaseInfo.getReleaseCategory())) {
-                    param += "release_category=" + releaseInfo.getReleaseCategory() + "&";
-                }
-                if (StringUtils.hasLength(checked)) {
-                    param += "check=" + checked.toUpperCase() + "&";
-                }
-                param = param.substring(0, param.length() - 1);
+        // スプレッドAPI情報取得
+        GoogleSheetsInfoMstEntity googleSheetsInfoMstEntity = iGoogleSheetsInfoMstService.getGoogleSheetsInfo(CommonConstant.GOOGLE_SHEETS_DIV_1, CommonConstant.GOOGLE_SHEETS_API_DIV_2);
+        if (googleSheetsInfoMstEntity != null) {
+            // GASデプロイ時に発行されたID
+            String deployId = googleSheetsInfoMstEntity.getGoogleSheetsFileUrl();
 
-                String searchParam = "";
-                if (StringUtils.hasLength(param)) {
-                    apiUrl = apiUrl + "?" + param;
-                    URL url = new URL(apiUrl);
-                    URLConnection con = url.openConnection();
-                    try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(con.getInputStream(), "Windows-31J"))) {
-                        while (reader.ready()) {
-                            Map jsonMap = (Map) JSONObject.parseObject(reader.readLine());
-                            log.debug("fvid:" + jsonMap.get("fvid"));
-                            searchParam = "fvid=" + jsonMap.get("fvid");
-                        }
-                    }
-                }
-                // スプレッドシート情報取得
-                googleSheetsInfoMstEntity = iGoogleSheetsInfoMstService.getGoogleSheetsInfo(CommonConstant.GOOGLE_SHEETS_DIV_1, CommonConstant.GOOGLE_SHEETS_API_DIV_1);
-                if (googleSheetsInfoMstEntity == null) {
-                    // スプレッドシートデータを用意されていません
-                    message = messageSource.getMessage("errors.google_sheets_nofile");
-                } else {
-                    listUrl =
-                        googleSheetsInfoMstEntity.getGoogleSheetsFileUrl() + googleSheetsInfoMstEntity
-                            .getGoogleSheetsFileId() + CommonConstant.GID + googleSheetsInfoMstEntity
-                            .getGoogleSheetsSheetId();
-                    if (StringUtils.hasLength(searchParam)) {
-                        listUrl = listUrl + "?" + searchParam;
-                    }
-                    log.debug("Google Sheets の情報（ファイルID：" + googleSheetsInfoMstEntity.getGoogleSheetsFileId()
-                        + "、シート名：" + googleSheetsInfoMstEntity.getGoogleSheetsSheetName() + "）");
-                }
-            } else {
+            String searchParam = "";
+            String fvid = getFvidByAppScript(releaseInfo, checked, deployId);
+            if (StringUtils.hasLength(fvid)) {
+                searchParam = "fvid=" + fvid;
+            }
+
+            // スプレッドシート情報取得
+            googleSheetsInfoMstEntity = iGoogleSheetsInfoMstService.getGoogleSheetsInfo(CommonConstant.GOOGLE_SHEETS_DIV_1, CommonConstant.GOOGLE_SHEETS_API_DIV_1);
+            if (googleSheetsInfoMstEntity == null) {
                 // スプレッドシートデータを用意されていません
                 message = messageSource.getMessage("errors.google_sheets_nofile");
+            } else {
+                listUrl =
+                    googleSheetsInfoMstEntity.getGoogleSheetsFileUrl() + googleSheetsInfoMstEntity
+                        .getGoogleSheetsFileId() + CommonConstant.GID + googleSheetsInfoMstEntity
+                        .getGoogleSheetsSheetId();
+                if (StringUtils.hasLength(searchParam)) {
+                    listUrl = listUrl + "?" + searchParam;
+                }
+                log.debug("Google Sheets の情報（ファイルID：" + googleSheetsInfoMstEntity.getGoogleSheetsFileId()
+                    + "、シート名：" + googleSheetsInfoMstEntity.getGoogleSheetsSheetName() + "）");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            // スプレッドシートデータを用意されていません
+            message = messageSource.getMessage("errors.google_sheets_nofile");
         }
         Map result = new HashMap();
         result.put("listUrl", listUrl);
@@ -336,8 +302,8 @@ public class ReleaseServiceImpl implements ReleaseService {
         }
         resultMap.put("supportPeriodList", supportPeriodList);
 
-        // 担当者情報取得
-        List<UserInfoEntity> list = iUserInfoService.getUserList();
+        // 新車入力担当者情報取得
+        List<UserInfoEntity> list = iUserInfoService.getPicList();
         List<Map> userList = new ArrayList<>();
         for (UserInfoEntity userInfoEntity : list) {
             Map userMap = new HashMap();
@@ -466,8 +432,11 @@ public class ReleaseServiceImpl implements ReleaseService {
         updateSheet(ranges, values);
 
         // Slack通知
-        if (!StringUtils.hasLength(finalChangeDate) && !StringUtils.hasLength(releaseInfo.getSalesCategoryL())) {
-            sendSlack(getMessage(releaseInfo));
+        if (!StringUtils.hasLength(releaseInfo.getSalesCategoryL())) {
+            if (!StringUtils.hasLength(finalChangeDate)
+                || !releaseInfoEntity.getReleaseCategory().equals(releaseInfo.getReleaseCategoryId())) {
+                sendSlack(releaseInfo);
+            }
         }
 
         return true;
@@ -527,6 +496,8 @@ public class ReleaseServiceImpl implements ReleaseService {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new ServiceException(e.getMessage());
             }
+            // Google Sheetsの所定セルに値を投入
+            updateSheet(ranges, values);
         }
         return false;
     }
@@ -570,9 +541,13 @@ public class ReleaseServiceImpl implements ReleaseService {
         // ーカーCD
         releaseInfoEntity.setMakerCd(Long.parseLong(releaseInfo.getMakerCd()));
         // 車種CD
-        releaseInfoEntity.setCarModelCd(Long.parseLong(releaseInfo.getCarModelCd()));
+        if (StringUtils.hasLength(releaseInfo.getCarModelCd())) {
+            releaseInfoEntity.setCarModelCd(Long.parseLong(releaseInfo.getCarModelCd()));
+        }
         // 車種系統CD
-        releaseInfoEntity.setCarModelGroupCd(Long.parseLong(releaseInfo.getCarModelGroupCd()));
+        if (StringUtils.hasLength(releaseInfo.getCarModelGroupCd())) {
+            releaseInfoEntity.setCarModelGroupCd(Long.parseLong(releaseInfo.getCarModelGroupCd()));
+        }
         // 仮車種名
         releaseInfoEntity.setTempCarName(releaseInfo.getTempCarName());
         // 仮車種系統名
@@ -643,10 +618,11 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     private void getService() throws ServiceException {
         JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-        List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
+        List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS, ScriptScopes.SCRIPT_PROJECTS);
         String CREDENTIALS_FILE_PATH = constant.getCredentialsFilePath();
         String TOKENS_FILE_PATH = constant.getTokensFilePath();
         String userId = SessionUtil.getUserInfo().getGUserId();
+
 
         try {
             // load client secrets
@@ -669,6 +645,10 @@ public class ReleaseServiceImpl implements ReleaseService {
                 GsonFactory.getDefaultInstance(), credential)
                 .setApplicationName(appName)
                 .build();
+            service = new Script.Builder(new NetHttpTransport(),
+                GsonFactory.getDefaultInstance(), credential)
+                .setApplicationName(appName)
+                .build();
 
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
@@ -676,50 +656,111 @@ public class ReleaseServiceImpl implements ReleaseService {
     }
 
     /**
-     * Slack通知文言取得
+     * Fvid取得
      *
-     * @param releaseInfo リリース情報
+     * @param releaseInfo リリース情報検索条件
+     * @param checked 検索条件CheckBox
+     * @param deployId GASデプロイ ID
      */
-    private String getMessage(ReleaseInfo releaseInfo) {
-        String message = "";
-        if ("0".equals(releaseInfo.getReleaseCategoryId())) {
-            message += CommonConstant.SLACK_MESSAGE_RELEASE_CATEGORY_0;
+    private String getFvidByAppScript(ReleaseInfo releaseInfo, String checked, String deployId) {
+        ExecutionRequest request = new ExecutionRequest()
+            .setFunction("doGet");
+        Map parameter = new HashMap();
+        Map param = new HashMap();
+        if (StringUtils.hasLength(releaseInfo.getSupportPeriod())) {
+            param.put("support_period", releaseInfo.getSupportPeriod());
         }
-        if ("3".equals(releaseInfo.getReleaseCategoryId())) {
-            message += CommonConstant.SLACK_MESSAGE_RELEASE_CATEGORY_3;
+        if (StringUtils.hasLength(releaseInfo.getSalesCategoryL())) {
+            param.put("sales_category_l", releaseInfo.getSalesCategoryL());
         }
-        // リリース区分により文言を変更
-        message += CommonConstant.SLACK_MESSAGE_RELEASE_CATEGORY_L
-            + releaseInfo.getReleaseCategory()
-            + CommonConstant.SLACK_MESSAGE_RELEASE_CATEGORY_R
-            + CommonConstant.SLACK_MESSAGE_NEW_LINE;
-        // ・≪車名≫
-        message += CommonConstant.SLACK_MESSAGE_CAR_NAME
-            + releaseInfo.getCarModelName()
-            + CommonConstant.SLACK_MESSAGE_NEW_LINE;
-        // 「≪販売区分の備考≫」　　≪発売日≫
-        message += CommonConstant.SLACK_MESSAGE_SALES_CATEGORY_NOTE_L
-            + releaseInfo.getSalesCategoryNote()
-            + CommonConstant.SLACK_MESSAGE_SALES_CATEGORY_NOTE_R
-            + CommonConstant.SLACK_MESSAGE_SPACE
-            + CommonConstant.SLACK_MESSAGE_SPACE
-            + releaseInfo.getLaunchDate()
-            + CommonConstant.SLACK_MESSAGE_NEW_LINE;
-        // ≪リリースURL≫
-        message += releaseInfo.getReleaseUrl();
+        if (StringUtils.hasLength(releaseInfo.getSalesCategoryR())) {
+            param.put("sales_category_r", releaseInfo.getSalesCategoryR());
+        }
+        if (StringUtils.hasLength(releaseInfo.getPicId())) {
+            param.put("pic_user", releaseInfo.getPicId());
+        }
+        if (StringUtils.hasLength(releaseInfo.getMakerCd())) {
+            param.put("maker_name", releaseInfo.getMakerCd());
+        }
+        if (StringUtils.hasLength(releaseInfo.getCarModelCd())) {
+            param.put("car_model_name", releaseInfo.getCarModelCd());
+        }
+        if (StringUtils.hasLength(releaseInfo.getCarModelGroupCd())) {
+            param.put("car_model_group_name", releaseInfo.getCarModelGroupCd());
+        }
+        if (StringUtils.hasLength(releaseInfo.getReleaseCategory())) {
+            param.put("release_category", releaseInfo.getReleaseCategory());
+        }
+        if (StringUtils.hasLength(checked)) {
+            param.put("check", checked.toUpperCase());
+        }
+        if (param.keySet().size() == 0) {
+            return null;
+        }
 
-        return message;
+        parameter.put("parameter", param);
+        List paramList = new ArrayList();
+        paramList.add(parameter);
+        request.setParameters(paramList);
+        try {
+            if (service == null) {
+                getService();
+            }
+
+            // Make the API request.
+            Operation op =
+                service.scripts().run(deployId, request).execute();
+
+            // Print results of request.
+            if (op.getError() == null) {
+                // The result provided by the API needs to be cast into
+                // the correct type, based upon what types the Apps
+                // Script function returns. Here, the function returns
+                // an Apps Script Object with String keys and values,
+                // so must be cast into a Java Map (folderSet).
+                Map<String, String> folderSet =
+                    (Map<String, String>)(op.getResponse().get("result"));
+                if (folderSet.size() > 0) {
+                    for (String id: folderSet.keySet()) {
+                        return folderSet.get(id);
+                    }
+                }
+            }
+        } catch (GoogleJsonResponseException e) {
+            // The API encountered a problem before the script was called.
+            e.printStackTrace(System.out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
-     * Slack通知文言取得
+     * Slack通知
      *
-     * @param message 文言
+     * @param releaseInfo リリース情報
      */
     @SneakyThrows
-    private Map sendSlack(String message) throws ServiceException {
+    private Map sendSlack(ReleaseInfo releaseInfo) throws ServiceException {
         log.debug("Slackへ送信 開始です");
         try {
+            // Slack文言 ・メッセージID
+            String messageId = CommonConstant.SLACK_MEAAGE_ID_MAP.get(releaseInfo.getReleaseCategoryId());
+            // Slack文言情報取得
+            SlackDocumentMstEntity slackDocumentMstEntity = iSlackDocumentMstService.getById(messageId);
+            // メッセージ固定文言
+            String message = slackDocumentMstEntity.getMessageFixedWord();
+            // リリース区分
+            message = message.replace(CommonConstant.SLACK_MESSAGE_RELEASE_CATEGORY_KEY, releaseInfo.getReleaseCategory());
+            // 車名
+            message = message.replace(CommonConstant.SLACK_MESSAGE_CAR_NAME_KEY, releaseInfo.getCarModelName());
+            // 販売区分の備考
+            message = message.replace(CommonConstant.SLACK_MESSAGE_SALES_CATEGORY_NOTE_KEY, releaseInfo.getSalesCategoryNote());
+            // 発売日
+            message = message.replace(CommonConstant.SLACK_MESSAGE_LAUNCH_DATE_KEY, releaseInfo.getLaunchDate());
+            // リリースURL
+            message = message.replace(CommonConstant.SLACK_MESSAGE_RELEASE_URL_KEY, releaseInfo.getReleaseUrl());
+            String slackText = message;
 
             SlackConfig config = new SlackConfig();
             config.setStatsEnabled(false);
@@ -730,9 +771,9 @@ public class ReleaseServiceImpl implements ReleaseService {
             String token = constant.getSlackToken();
 
             ChatPostMessageResponse response = slack.methods(token).chatPostMessage(req -> req
-                .channel("#test") // チャンネル名を指定。
-                .threadTs("1668668610.604149") // スレッドに書き込む場合はスレッドを指定。必須項目ではない。
-                .text(message));
+                .channel(slackDocumentMstEntity.getChannelInfo()) // チャンネル名を指定。
+                .threadTs(slackDocumentMstEntity.getThreadTs()) // スレッドに書き込む場合はスレッドを指定。必須項目ではない。
+                .text(slackText));
             if (response.isOk()) {
                 Message postedMessage = response.getMessage();
                 log.debug(String.valueOf(postedMessage));

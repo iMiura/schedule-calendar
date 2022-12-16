@@ -2,6 +2,7 @@ import {Component, NgZone, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CredentialService} from "./credential.service";
+import {LocalStorageService} from "ngx-webstorage";
 
 @Component({
   selector: 'app-operate',
@@ -15,6 +16,7 @@ export class CredentialComponent implements OnInit {
               private router: Router,
               private route: ActivatedRoute,
               private ngZone: NgZone,
+              private localStorage: LocalStorageService,
               private credentialService: CredentialService) {
 
   }
@@ -29,7 +31,12 @@ export class CredentialComponent implements OnInit {
 
   query() {
     this.credentialService.getCredential(this.code).then(res => {
-      this.navigate(['/home']);
+      const userIdentity = this.localStorage.retrieve('userIdentity');
+      if (userIdentity.teamId == 2) {
+        this.navigate(['/release']);
+      } else {
+        this.navigate(['/home']);
+      }
     });
   }
 

@@ -28,4 +28,11 @@ public interface IUserInfoService extends IService<UserInfoEntity> {
      * @return List<UserInfoEntity>
      */
     List<UserInfoEntity> getUserList();
+
+    /**
+     * 新車入力担当者情報取得
+     *
+     * @return List<UserInfoEntity>
+     */
+    List<UserInfoEntity> getPicList();
 }

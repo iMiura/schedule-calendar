@@ -52,12 +52,12 @@ export class ReleaseInfoComponent implements OnInit {
   ngOnInit(): void {
     this.message = null;
     this.validateForm = this.fb.group({
-      releaseCategoryId: [null],
+      releaseCategoryId: [null, [Validators.required]],
       releaseCategory: [null],
       nextConfirmDate: [null],
       announcementDate: [null, [Validators.required]],
       launchDate: [null, [Validators.required]],
-      releaseUrl: [null],
+      releaseUrl: [null, [Validators.maxLength(1000)]],
       makerCd: [null, [Validators.required]],
       makerName: [null],
       carModelCd: [null, [Validators.required]],
@@ -65,23 +65,19 @@ export class ReleaseInfoComponent implements OnInit {
       carModelGroupCd: [null, [Validators.required]],
       carModelGroupName: [null],
       tempChecked: [false],
-      tempCarName: [null],
-      tempCarGroupName: [null],
+      tempCarName: [null, [Validators.required, Validators.maxLength(20)]],
+      tempCarGroupName: [null, [Validators.required, Validators.maxLength(50)]],
       salesCategoryIdL: [null, [this.salesCategoryLValidator]],
       salesCategoryL: [null],
       salesCategoryIdR: [null, [this.salesCategoryRValidator]],
       salesCategoryR: [null],
-      salesCategoryNote: [null],
-      supportPeriod: [null],
+      salesCategoryNote: [null, [Validators.maxLength(255)]],
+      supportPeriod: [null, [Validators.required]],
       picId: [null],
       userName: [null],
       note: [null, [Validators.maxLength(255)]],
     });
     this.releaseInfoId = this.route.snapshot.queryParams.release_info_id;
-    if(!this.validateForm.value.tempChecked) {
-      this.validateForm.controls.tempCarName.disable({onlySelf: true, emitEvent: true});
-      this.validateForm.controls.tempCarGroupName.disable({onlySelf: true, emitEvent: true});
-    }
     if (!this.releaseInfoId) {
       this.releaseInfoId = '';
     }
@@ -91,7 +87,7 @@ export class ReleaseInfoComponent implements OnInit {
   salesCategoryLValidator = (control: FormControl): { [s: string]: boolean } => {
     if (!control.value) {
       return;
-    } else if (control.value == this.validateForm.controls.salesCategoryIdR.value) {
+    } else if (control.value == this.validateForm.value.salesCategoryIdR) {
       return { error: true, same: true, required: false  };
     } else {
       this.validateForm.controls.salesCategoryIdR.setErrors(null);
@@ -102,7 +98,7 @@ export class ReleaseInfoComponent implements OnInit {
   salesCategoryRValidator = (control: FormControl): { [s: string]: boolean } => {
     if (!control.value) {
       return;
-    } else if (control.value == this.validateForm.controls.salesCategoryIdL.value) {
+    } else if (control.value == this.validateForm.value.salesCategoryIdL) {
       return { error: true, same: true, required: false  };
     } else {
       this.validateForm.controls.salesCategoryIdL.setErrors(null);
@@ -116,45 +112,91 @@ export class ReleaseInfoComponent implements OnInit {
       this.supportPeriodList = res.result.supportPeriodList;
       this.userList = res.result.userList;
       this.finalChangeDate = res.result.finalChangeDate;
-      if (this.finalChangeDate) {
-        this.deleteFlg = res.result.releaseInfo.deleteFlg;
-        let isChecked = false;
-        if (res.result.releaseInfo.tempCarName || res.result.releaseInfo.tempCarGroupName) {
-          isChecked = true;
-        }
-        let nextConfirmDate;
-        if (res.result.releaseInfo.nextConfirmDate) {
-          nextConfirmDate = moment(res.result.releaseInfo.nextConfirmDate).format('YYYY/MM/DD');
-        }
-        let supportPeriod;
-        if (res.result.releaseInfo.supportPeriod) {
-          supportPeriod = moment(res.result.releaseInfo.supportPeriod + '01').format('YYYY/MM');
-        }
-        let picId;
-        if (res.result.releaseInfo.picId) {
-          picId = res.result.releaseInfo.picId + '';
-        }
-        this.validateForm.patchValue({
-          releaseCategoryId: res.result.releaseInfo.releaseCategory + '',
-          nextConfirmDate: nextConfirmDate,
-          announcementDate: moment(res.result.releaseInfo.announcementDate).format('YYYY/MM/DD'),
-          launchDate: moment(res.result.releaseInfo.launchDate).format('YYYY/MM/DD'),
-          releaseUrl: res.result.releaseInfo.releaseUrl,
-          makerCd: res.result.releaseInfo.makerCd + '',
-          carModelCd: res.result.releaseInfo.carModelCd + '',
-          carModelGroupCd: res.result.releaseInfo.carModelGroupCd + '',
-          tempChecked: isChecked,
-          tempCarName: res.result.releaseInfo.tempCarName,
-          tempCarGroupName: res.result.releaseInfo.tempCarGroupName,
-          salesCategoryIdL: res.result.releaseInfo.salesCategoryL + '',
-          salesCategoryIdR: res.result.releaseInfo.salesCategoryR + '',
-          salesCategoryNote: res.result.releaseInfo.salesCategoryNote,
-          supportPeriod: supportPeriod,
-          picId: picId,
-          note: res.result.releaseInfo.note,
-        });
-      }
+      this.formPatchValue(res.result.releaseInfo);
+      this.disabledItem((res.result.releaseInfo))
     });
+  }
+
+  formPatchValue(releaseInfo) {
+    if (this.finalChangeDate) {
+      this.deleteFlg = releaseInfo.deleteFlg;
+      let isChecked = false;
+      if (releaseInfo.tempCarName || releaseInfo.tempCarGroupName) {
+        isChecked = true;
+      }
+      let releaseCategoryId;
+      if (releaseInfo.releaseCategory) {
+        releaseCategoryId = releaseInfo.releaseCategory + '';
+      }
+      let nextConfirmDate;
+      if (releaseInfo.nextConfirmDate) {
+        nextConfirmDate = moment(releaseInfo.nextConfirmDate).format('YYYY/MM/DD');
+      }
+      let carModelCd;
+      if (releaseInfo.carModelCd) {
+        carModelCd = releaseInfo.carModelCd + '';
+      }
+      let carModelGroupCd;
+      if (releaseInfo.carModelGroupCd) {
+        carModelGroupCd = releaseInfo.carModelGroupCd + '';
+      }
+      let salesCategoryIdL;
+      if (releaseInfo.salesCategoryL) {
+        salesCategoryIdL = releaseInfo.salesCategoryL + '';
+      }
+      let salesCategoryIdR;
+      if (releaseInfo.salesCategoryR) {
+        salesCategoryIdR = releaseInfo.salesCategoryR + '';
+      }
+      let supportPeriod;
+      if (releaseInfo.supportPeriod) {
+        supportPeriod = moment(releaseInfo.supportPeriod + '01').format('YYYY/MM');
+      }
+      let picId;
+      if (releaseInfo.picId) {
+        picId = releaseInfo.picId + '';
+      }
+      this.validateForm.patchValue({
+        releaseCategoryId: releaseCategoryId,
+        nextConfirmDate: nextConfirmDate,
+        announcementDate: moment(releaseInfo.announcementDate).format('YYYY/MM/DD'),
+        launchDate: moment(releaseInfo.launchDate).format('YYYY/MM/DD'),
+        releaseUrl: releaseInfo.releaseUrl,
+        makerCd: releaseInfo.makerCd + '',
+        carModelCd: carModelCd,
+        carModelGroupCd: carModelGroupCd,
+        tempChecked: isChecked,
+        tempCarName: releaseInfo.tempCarName,
+        tempCarGroupName: releaseInfo.tempCarGroupName,
+        salesCategoryIdL: salesCategoryIdL,
+        salesCategoryIdR: salesCategoryIdR,
+        salesCategoryNote: releaseInfo.salesCategoryNote,
+        supportPeriod: supportPeriod,
+        picId: picId,
+        note: releaseInfo.note,
+      });
+    }
+  }
+
+  disabledItem(releaseInfo) {
+    if (this.finalChangeDate) {
+      const salesCategoryIdL = releaseInfo.salesCategoryL;
+      if (salesCategoryIdL == '0') {
+        this.validateForm.get('tempCarName').disable();
+        this.validateForm.get('carModelGroupCd').disable();
+      } else if (salesCategoryIdL == '1') {
+        this.validateForm.get('carModelCd').disable();
+        this.validateForm.get('carModelGroupCd').disable();
+      } else {
+        this.validateForm.get('tempCarName').disable();
+        this.validateForm.get('tempCarGroupName').disable();
+      }
+    } else {
+      this.validateForm.get('carModelCd').disable();
+      this.validateForm.get('carModelGroupCd').disable();
+      this.validateForm.get('tempCarName').disable();
+      this.validateForm.get('tempCarGroupName').disable();
+    }
   }
 
   changeReleaseCategory() {
@@ -167,12 +209,19 @@ export class ReleaseInfoComponent implements OnInit {
   changeMaker() {
     this.validateForm.value.carModelCd = null;
     this.validateForm.value.carModelGroupCd = null;
-    this.validateForm.controls.carModelCd.reset();
-    this.validateForm.controls.carModelGroupCd.reset();
+    this.validateForm.get('carModelCd').reset();
+    this.validateForm.get('carModelGroupCd').reset();
     if (this.validateForm.value.makerCd) {
       this.releaseInfoService.getCarModelList(this.validateForm.value.makerCd).then(res => {
         this.carModelList = res.result.carModelList;
       });
+      const salesCategoryIdL = this.validateForm.value.salesCategoryIdL;
+      if (salesCategoryIdL != '1') {
+        this.validateForm.get('carModelCd').enable();
+      }
+    } else {
+      this.validateForm.get('carModelCd').disable();
+      this.validateForm.get('carModelGroupCd').disable();
     }
   }
 
@@ -183,12 +232,57 @@ export class ReleaseInfoComponent implements OnInit {
       this.releaseInfoService.getCarModelGroupList(this.validateForm.value.makerCd, this.validateForm.value.carModelCd).then(res => {
         this.carModelGroupList = res.result.carModelGroupList;
       });
+      const salesCategoryIdL = this.validateForm.value.salesCategoryIdL;
+      if (salesCategoryIdL != '0' && salesCategoryIdL != '1') {
+        this.validateForm.get('carModelGroupCd').enable();
+      } else {
+        this.validateForm.get('carModelGroupCd').disable();
+      }
     }
   }
 
   changeSalesCategory() {
-    this.validateForm.value.salesCategoryIdR = null;
-    this.validateForm.controls.salesCategoryIdR.reset();
+    const salesCategoryIdL = this.validateForm.value.salesCategoryIdL;
+    const makerCd = this.validateForm.value.makerCd;
+    const carModelCd = this.validateForm.value.carModelCd;
+    if (!salesCategoryIdL) {
+      this.validateForm.value.salesCategoryIdR = null;
+      this.validateForm.get('salesCategoryIdR').reset();
+    }
+    if (salesCategoryIdL == '0') {
+      if (makerCd) {
+        this.validateForm.get('carModelCd').enable();
+      } else {
+        this.validateForm.get('carModelCd').disable();
+      }
+      this.validateForm.get('carModelGroupCd').reset();
+      this.validateForm.get('carModelGroupCd').disable();
+      this.validateForm.get('tempCarName').reset();
+      this.validateForm.get('tempCarName').disable();
+      this.validateForm.get('tempCarGroupName').enable();
+    } else if (salesCategoryIdL == '1') {
+      this.validateForm.get('carModelCd').reset();
+      this.validateForm.get('carModelCd').disable();
+      this.validateForm.get('carModelGroupCd').reset();
+      this.validateForm.get('carModelGroupCd').disable();
+      this.validateForm.get('tempCarName').enable();
+      this.validateForm.get('tempCarGroupName').enable();
+    } else {
+      if (makerCd) {
+        this.validateForm.get('carModelCd').enable();
+      } else {
+        this.validateForm.get('carModelCd').disable();
+      }
+      if (carModelCd) {
+        this.validateForm.get('carModelGroupCd').enable();
+      } else {
+        this.validateForm.get('carModelGroupCd').disable();
+      }
+      this.validateForm.get('tempCarName').reset();
+      this.validateForm.get('tempCarName').disable();
+      this.validateForm.get('tempCarGroupName').reset();
+      this.validateForm.get('tempCarGroupName').disable();
+    }
   }
 
   submitForm(): void {
@@ -203,16 +297,20 @@ export class ReleaseInfoComponent implements OnInit {
           that.validateForm.value.makerName = item.label;
         }
       });
-      this.carModelList.filter(function (item) {
-        if (item.value == that.validateForm.value.carModelCd) {
-          that.validateForm.value.carModelName = item.label;
-        }
-      });
-      this.carModelGroupList.filter(function (item) {
-        if (item.value == that.validateForm.value.carModelGroupCd) {
-          that.validateForm.value.carModelGroupName = item.label;
-        }
-      });
+      if (this.carModelList) {
+        this.carModelList.filter(function (item) {
+          if (item.value == that.validateForm.value.carModelCd) {
+            that.validateForm.value.carModelName = item.label;
+          }
+        });
+      }
+      if (this.carModelGroupList) {
+        this.carModelGroupList.filter(function (item) {
+          if (item.value == that.validateForm.value.carModelGroupCd) {
+            that.validateForm.value.carModelGroupName = item.label;
+          }
+        });
+      }
       this.salesCategoryLList.filter(function (item) {
         if (item.value == that.validateForm.value.salesCategoryIdL) {
           that.validateForm.value.salesCategoryL = item.label;

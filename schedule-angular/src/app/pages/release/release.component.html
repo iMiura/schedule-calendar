@@ -58,7 +58,6 @@
               [nzDropdownMatchSelectWidth]=false
               [nzSize]="size"
               [(ngModel)]="salesCategoryL"
-              (ngModelChange)="changeSalesCategory()"
               style="width: 120px;margin-left: 10px;"
             >
               <nz-option nzLabel="" nzValue="">
@@ -72,7 +71,6 @@
               [nzDropdownMatchSelectWidth]=false
               [nzSize]="size"
               [(ngModel)]="salesCategoryR"
-              [disabled]="salesCategoryL==null || salesCategoryL==''"
               style="width: 120px;margin-left: 10px;"
             >
               <nz-option nzLabel="" nzValue="">

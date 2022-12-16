@@ -73,3 +73,19 @@ hr {
   text-shadow: none;
   box-shadow: none;
 }
+
+
+.ant-input-disabled, .ant-input[disabled] {
+  background-color: #d9d9d9!important;
+  border: 1px solid #c0c0c0!important;
+}
+
+.ant-form-item-required-label::before {
+  display: inline-block;
+  margin-right: 4px;
+  color: #ff4d4f;
+  font-size: 14px;
+  font-family: SimSun,sans-serif;
+  line-height: 1;
+  content: '*';
+}

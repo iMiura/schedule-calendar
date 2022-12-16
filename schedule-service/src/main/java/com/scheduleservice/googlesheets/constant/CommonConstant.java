@@ -1,5 +1,8 @@
 package com.scheduleservice.googlesheets.constant;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author :keisho
  */
@@ -71,47 +74,34 @@ public class CommonConstant {
     public static final String STRING_FORMAT_YMD_2 = "yyyyMMdd";
 
     /**
-     * Slack文言 ・審議対象「MSG-001」
+     * Slack文言 ・メッセージID「MSG-001、MSG-002、MSG-003、MSG-004」
      */
-    public static final String SLACK_MESSAGE_RELEASE_CATEGORY_0 = "@井上 恵一朗　@保坂和之　@青木 真一　@勝呂 春美\r\n";
+    public static final Map<String, String> SLACK_MEAAGE_ID_MAP = new HashMap();
+    static {
+        SLACK_MEAAGE_ID_MAP.put("0", "MSG-001");
+        SLACK_MEAAGE_ID_MAP.put("1", "MSG-002");
+        SLACK_MEAAGE_ID_MAP.put("2", "MSG-003");
+        SLACK_MEAAGE_ID_MAP.put("3", "MSG-004");
+    }
 
     /**
-     * Slack文言 ・情報のみ「MSG-004」
+     * Slack文言変更KEY リリース区分「$1」
      */
-    public static final String SLACK_MESSAGE_RELEASE_CATEGORY_3 = "@保坂和之\r\n";
-
+    public static final String SLACK_MESSAGE_RELEASE_CATEGORY_KEY = "$1";
     /**
-     * Slack文言 「【」
+     * Slack文言変更KEY 車名「$2」
      */
-    public static final String SLACK_MESSAGE_RELEASE_CATEGORY_L = "【";
-
+    public static final String SLACK_MESSAGE_CAR_NAME_KEY = "$2";
     /**
-     * Slack文言 「】」
+     * Slack文言変更KEY 販売区分の備考「$3」
      */
-    public static final String SLACK_MESSAGE_RELEASE_CATEGORY_R = "】";
-
+    public static final String SLACK_MESSAGE_SALES_CATEGORY_NOTE_KEY = "$3";
     /**
-     * Slack文言 「・」
+     * Slack文言変更KEY 発売日「$4」
      */
-    public static final String SLACK_MESSAGE_CAR_NAME = "・";
-
+    public static final String SLACK_MESSAGE_LAUNCH_DATE_KEY = "$4";
     /**
-     * Slack文言 「「」
+     * Slack文言変更KEY リリースURL「$5」
      */
-    public static final String SLACK_MESSAGE_SALES_CATEGORY_NOTE_L = "「";
-
-    /**
-     * Slack文言 「」」
-     */
-    public static final String SLACK_MESSAGE_SALES_CATEGORY_NOTE_R = "」";
-
-    /**
-     * Slack文言 「　」
-     */
-    public static final String SLACK_MESSAGE_SPACE = "　";
-
-    /**
-     * Slack文言 「\r\n」
-     */
-    public static final String SLACK_MESSAGE_NEW_LINE = "\r\n";
+    public static final String SLACK_MESSAGE_RELEASE_URL_KEY = "$5";
 }

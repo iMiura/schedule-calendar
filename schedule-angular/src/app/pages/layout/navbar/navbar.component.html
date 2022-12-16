@@ -17,7 +17,7 @@
         <div style="position: fixed;top:0;right: 20px;text-align: right;">
           <div>
             <ng-container>
-              <button nz-button nzType="primary" id="signout_button" nzDanger>ログアウト</button>
+              <button nz-button nzType="primary" id="signout_button" nzDanger (click)="logout()">ログアウト</button>
             </ng-container>
           </div>
         </div>
@@ -39,7 +39,7 @@
     <div style="margin-top: 108px;height: 100%;background-color: #FFF1CE;">
       <nz-content>
         <div class="inner-content" id="inner-content">
-          <h3>{{teamName}}：{{radioLabel[radioValue]}}</h3>
+          <h3>{{radioValue<3?teamName:'チーム共通'}}：{{radioLabel[radioValue]}}</h3>
           <router-outlet></router-outlet>
         </div>
       </nz-content>

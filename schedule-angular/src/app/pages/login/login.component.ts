@@ -5,6 +5,7 @@ import {ResponseEnum} from "../../response.enum";
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {LoginService} from "../../core/auth/login.service";
 import {SERVER_API_URL} from "../../app.constant";
+import {LocalStorageService} from "ngx-webstorage";
 
 declare let google: any;
 declare let returnCitySN: any;
@@ -20,6 +21,7 @@ export class LoginComponent implements OnInit {
               private router: Router,
               private message: NzMessageService,
               private loginService: LoginService,
+              private localStorage: LocalStorageService,
               private ngZone: NgZone) {
 
   }
@@ -53,10 +55,16 @@ export class LoginComponent implements OnInit {
       if (data.body.result.URL) {
         window.location.href=data.body.result.URL;
       } else {
-        that.navigate(['/home'], {
-          skipLocationChange: false,
-        });
-
+        const userIdentity = that.localStorage.retrieve('userIdentity');
+        if (userIdentity.teamId == 2) {
+          that.navigate(['/release'], {
+            skipLocationChange: false,
+          });
+        } else {
+          that.navigate(['/home'], {
+            skipLocationChange: false,
+          });
+        }
       }
     })
   }

@@ -11,6 +11,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.script.ScriptScopes;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.scheduleservice.googlesheets.config.ConstantPropertiesConfig;
@@ -36,6 +37,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -209,9 +211,6 @@ public class OperateServiceImpl implements OperateService {
         }
         valueList.add(String.valueOf(status));
 // 202209 業務フロー 作業時間見える化対応 w.w start
-
-        boolean updateFlg = iWorkTimeManagementService.updateTimeInfo(workTimeManagementEntity, localDateTime);
-
 // 作業時間管理情報取得
         List<WorkTimeManagementEntity> list = iWorkTimeManagementService.getWorkTime(teamId, ym, workTimeManagementEntity.getTaskId());
         // 作業時間
@@ -232,12 +231,12 @@ public class OperateServiceImpl implements OperateService {
             times = Math.ceil(times);
         }
         int workTimes = (int) times;
-        valueList.add(workTimes);
+        valueList.add(workTimes / 60 + ":" + String.format("%02d", workTimes % 60));
 // 202209 業務フロー 作業時間見える化対応 w.w end
         // Google Sheetsの所定セルに値を投入
         updateSheet(teamId, ym, range, valueList);
 
-        return updateFlg;
+        return iWorkTimeManagementService.updateTimeInfo(workTimeManagementEntity, localDateTime);
     }
 
     /**
@@ -280,7 +279,7 @@ public class OperateServiceImpl implements OperateService {
     public String authorize(String userId, ServletRequest request) throws ServiceException {
 
         JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-        List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
+        List<String> SCOPES = Arrays.asList(SheetsScopes.SPREADSHEETS, ScriptScopes.SCRIPT_PROJECTS);
         String CREDENTIALS_FILE_PATH = constant.getCredentialsFilePath();
         String TOKENS_FILE_PATH = constant.getTokensFilePath();
 
