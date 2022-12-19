@@ -37,7 +37,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfoEnt
     public List<UserInfoEntity> getPicList() {
         LambdaQueryWrapper<UserInfoEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserInfoEntity::getDelFlg, 0)
-            .eq(UserInfoEntity::getUserPermission, 1)
+            .eq(UserInfoEntity::getUserPermission, 2)
             .ne(UserInfoEntity::getRoleId, 5)
             .ne(UserInfoEntity::getRoleId, 6);
         return list(queryWrapper);
