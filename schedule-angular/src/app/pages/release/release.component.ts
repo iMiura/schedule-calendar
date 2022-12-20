@@ -68,6 +68,24 @@ export class ReleaseComponent implements OnInit {
       this.makerList = res.result.makerList;
       this.userList = res.result.userList;
       this.masterScheduleList = res.result.masterScheduleList;
+      this.releaseService.searchRelease(
+        this.makerName,
+        this.carModelName,
+        this.carModelGroupName,
+        this.supportPeriod,
+        this.salesCategoryL,
+        this.salesCategoryR,
+        this.releaseCategory,
+        this.picId,
+        this.checked
+      ).then(res => {
+        if (res.result.listUrl.indexOf('fvid') > -1) {
+          this.isFilter = true;
+        } else {
+          this.isFilter = false;
+        }
+        this.google_sheets_src = this.sanitizer.bypassSecurityTrustResourceUrl(res.result.listUrl);
+      });
     });
   }
 
