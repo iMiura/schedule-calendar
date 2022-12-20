@@ -47,10 +47,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
       if (this.teamId == 1) {
         if (this.permission == 0 || this.permission == 1) {
           this.radioValue = 2;
-          setTimeout(function() {
-            that.messageService.send(new Msg(that.radioValue));
-          }, 100);
         }
+        setTimeout(function() {
+          that.messageService.send(new Msg(that.radioValue));
+        }, 100);
       }
       if (this.teamId == 2) {
         this.radioValue = 5;
